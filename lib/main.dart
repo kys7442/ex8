@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -56,16 +58,26 @@ class _SplashScreenState extends State<SplashScreen> {
 
 // MainPage
 class MainPage extends StatefulWidget {
+  final int initialIndex;
+
+  MainPage({this.initialIndex = 0});
+
   @override
   _MainPageState createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex; // 초기화 시 전달된 인덱스를 사용
+  }
 
   final List<Widget> _pages = [
     HomePage(),
-    BiblePage(),
+    FirstPage(), // 성경책 페이지 (구약, 신약)
     HymnPage(),
     CommunityPage(),
   ];
@@ -279,73 +291,112 @@ class Etc3Page extends StatelessWidget {
 }
 
 // BiblePage with Tabs
-class BiblePage extends StatefulWidget {
+class FirstPage extends StatefulWidget {
   @override
-  _BiblePageState createState() => _BiblePageState();
+  _FirstPageState createState() => _FirstPageState();
 }
 
-class _BiblePageState extends State<BiblePage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _FirstPageState extends State<FirstPage> {
+  List<String> oldTestamentBooks = [];
+  List<String> newTestamentBooks = [];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    fetchBibleBooks();
+  }
+
+  Future<void> fetchBibleBooks() async {
+    final response1 = await http.get(Uri.parse('http://pamp.co.kr/bibles/groupold'));
+    final response2 = await http.get(Uri.parse('http://pamp.co.kr/bibles/groupnew'));
+
+    if (response1.statusCode == 200) {
+      final List<dynamic> data = json.decode(response1.body);
+      setState(() {
+        oldTestamentBooks = data.map((book) => book['book_kor'].toString()).toList();
+      });
+    }
+
+    if (response2.statusCode == 200) {
+      final List<dynamic> data = json.decode(response2.body);
+      setState(() {
+        newTestamentBooks = data.map((book) => book['book_kor'].toString()).toList();
+      });
+    }
+  }
+
+  Future<bool> _onWillPop() async {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context); // 이전 페이지가 있을 때는 정상적인 pop 작동
+    } else {
+      // 이전 페이지가 없을 때는 HomePage로 이동
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    }
+    return false; // 기본 뒤로 가기 동작 취소
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Bible'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: 'Old Testament'),
-            Tab(text: 'New Testament'),
-          ],
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text("성경"),
+            bottom: TabBar(
+              tabs: [
+                Tab(text: '구약'),
+                Tab(text: '신약'),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            children: [
+              BookGridView(books: oldTestamentBooks),
+              BookGridView(books: newTestamentBooks),
+            ],
+          ),
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          BibleFirstDepthPage(isOldTestament: true),
-          BibleFirstDepthPage(isOldTestament: false),
-        ],
       ),
     );
   }
 }
 
-// BibleFirstDepthPage
-class BibleFirstDepthPage extends StatelessWidget {
-  final bool isOldTestament;
+class BookGridView extends StatelessWidget {
+  final List<String> books;
 
-  BibleFirstDepthPage({required this.isOldTestament});
+  BookGridView({required this.books});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GridView.builder(
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          crossAxisSpacing: 10.0,
-          mainAxisSpacing: 10.0,
+          childAspectRatio: 2 / 1,
         ),
-        itemCount: 39,
+        itemCount: books.length,
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => BibleSecondDepthPage(title: 'Chapter $index'),
+                  builder: (context) => FirstSubPage(bookName: books[index], bookId: index + 1),
                 ),
               );
             },
             child: Card(
               child: Center(
-                child: Text('Book $index'),
+                child: Text(
+                  books[index],
+                  style: TextStyle(fontSize: 18),
+                ),
               ),
             ),
           );
@@ -355,58 +406,217 @@ class BibleFirstDepthPage extends StatelessWidget {
   }
 }
 
-// BibleSecondDepthPage
-class BibleSecondDepthPage extends StatelessWidget {
-  final String title;
+class FirstSubPage extends StatefulWidget {
+  final String bookName;
+  final int bookId;
 
-  BibleSecondDepthPage({required this.title});
+  FirstSubPage({required this.bookName, required this.bookId});
+
+  @override
+  _FirstSubPageState createState() => _FirstSubPageState();
+}
+
+class _FirstSubPageState extends State<FirstSubPage> {
+  List<Map<String, dynamic>> chapters = [];
+  bool isLoading = true;
+  String errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchChapters();
+  }
+
+  Future<void> fetchChapters() async {
+    try {
+      final response = await http.get(Uri.parse('http://pamp.co.kr/bibles/chapterGrp/${widget.bookId}'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          chapters = data.map((chapter) => {
+            'idx': chapter['idx'],
+            'lang': chapter['lang'],
+            'book_no': chapter['book_no'],
+            'book_kor': chapter['book_kor'],
+            'book_eng': chapter['book_eng'],
+            'chapter': chapter['chapter'].toString(),
+            'page': chapter['page'].toString(),
+            'contents': chapter['contents'] ?? '내용 없음',
+          }).toList();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          errorMessage = '데이터를 가져오는 데 실패했습니다.';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = '에러가 발생했습니다: $e';
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text('${widget.bookName}'),
       ),
-      body: ListView.builder(
-        itemCount: 20,
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : errorMessage.isNotEmpty
+          ? Center(child: Text(errorMessage))
+          : GridView.builder(
+        padding: EdgeInsets.all(3.0),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisSpacing: 2,
+          mainAxisSpacing: 2,
+          crossAxisCount: 3,
+          childAspectRatio: 2 / 1,
+        ),
+        itemCount: chapters.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text('Chapter $index'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BibleThirdDepthPage(title: 'Chapter $index'),
+          final chapter = chapters[index];
+          return Card(
+            elevation: 2,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FirstSub2Page(
+                      bookName: widget.bookName,
+                      bookId: widget.bookId,
+                      chapterId: int.parse(chapter['chapter']),
+                    ),
+                  ),
+                );
+              },
+              child: Center(
+                child: Text(
+                  '${chapter['chapter']}장',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              );
-            },
+              ),
+            ),
           );
         },
       ),
+      bottomNavigationBar: MainPageBottomNavigationBar(selectedIndex: 1), // 성경책 탭이 선택된 상태로 설정
     );
   }
 }
 
-// BibleThirdDepthPage
-class BibleThirdDepthPage extends StatelessWidget {
-  final String title;
+class FirstSub2Page extends StatefulWidget {
+  final String bookName;
+  final int bookId;
+  final int chapterId;
 
-  BibleThirdDepthPage({required this.title});
+  FirstSub2Page({required this.bookName, required this.bookId, required this.chapterId});
+
+  @override
+  _FirstSub2PageState createState() => _FirstSub2PageState();
+}
+
+class _FirstSub2PageState extends State<FirstSub2Page> {
+  List<Map<String, dynamic>> chapters = [];
+  bool isLoading = true;
+  String errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchChapters();
+  }
+
+  Future<void> fetchChapters() async {
+    try {
+      // Update the URL to use the bookId and chapterId passed to the page
+      final response = await http.get(Uri.parse(
+          'http://pamp.co.kr/bibles/chapterBook/${widget.bookId}/${widget.chapterId}'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          chapters = data.map((chapter) => {
+            'idx': chapter['idx'],
+            'lang': chapter['lang'],
+            'book_no': chapter['book_no'],
+            'book_kor': chapter['book_kor'],
+            'book_eng': chapter['book_eng'],
+            'chapter': chapter['chapter'].toString(),
+            'page': chapter['page'].toString(),
+            'contents': chapter['contents'] ?? '내용 없음',
+          }).toList();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          errorMessage = '데이터를 가져오는 데 실패했습니다.';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = '에러가 발생했습니다: $e';
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text('${widget.bookName} ${widget.chapterId}장'),
       ),
-      body: ListView.builder(
-        itemCount: 50,
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : errorMessage.isNotEmpty
+          ? Center(child: Text(errorMessage))
+          : ListView.builder(
+        padding: EdgeInsets.symmetric(vertical: 4.0), // Reduce vertical padding
+        itemCount: chapters.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text('$title, Verse $index: Content of the verse...'),
+          final chapter = chapters[index]['chapter'];
+          final page = chapters[index]['page'];
+          final contents = chapters[index]['contents'] ?? '내용 없음';
+
+          return Padding(
+            padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0), // Adjust spacing
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$chapter장 $page절 ',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: contents,
+                    style: TextStyle(fontWeight: FontWeight.normal),
+                  ),
+                ],
+              ),
+              style: TextStyle(fontSize: 15.0, height: 1.3), // Adjust font size and line height
+            ),
           );
         },
       ),
+      bottomNavigationBar: MainPageBottomNavigationBar(selectedIndex: 1), // 성경책 탭이 선택된 상태로 설정
     );
   }
 }
@@ -484,6 +694,46 @@ class SettingsPage extends StatelessWidget {
       child: Center(
         child: Text('Settings Page - 추후 구현 예정'),
       ),
+    );
+  }
+}
+
+// 공통적으로 사용할 하단 바 위젯
+class MainPageBottomNavigationBar extends StatelessWidget {
+  final int selectedIndex;
+
+  MainPageBottomNavigationBar({required this.selectedIndex});
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomNavigationBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.book),
+          label: '성경책',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.music_note),
+          label: '찬송가',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.people),
+          label: '커뮤니티',
+        ),
+      ],
+      currentIndex: selectedIndex, // 선택된 인덱스를 전달받아 설정
+      selectedItemColor: Colors.blue,
+      onTap: (index) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => MainPage(initialIndex: index)), // 선택한 인덱스를 MainPage로 전달
+              (route) => false,
+        );
+      },
     );
   }
 }
