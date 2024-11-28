@@ -646,7 +646,7 @@ class _FirstSub2PageState extends State<FirstSub2Page> {
   }
 }
 
-// Example placeholders for other pages
+// HymnPage
 class HymnPage extends StatefulWidget {
   @override
   _HymnPageState createState() => _HymnPageState();
@@ -698,7 +698,7 @@ class _HymnPageState extends State<HymnPage> {
               : GridView.builder(
                   padding: EdgeInsets.all(8.0),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 5, // 한 줄에 8개의 카드
+                    crossAxisCount: 5, // 한 줄에 5개의 카드
                     childAspectRatio: 2 / 1, // 카드의 가로 세로 비율
                   ),
                   itemCount: hymns.length,
@@ -708,7 +708,13 @@ class _HymnPageState extends State<HymnPage> {
                       elevation: 2,
                       child: InkWell(
                         onTap: () {
-                          // 카드 클릭 시 동작 추가 가능
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  HymnDetailPage(hymnId: hymn['id']),
+                            ),
+                          );
                         },
                         child: Center(
                           child: Text(
@@ -721,6 +727,62 @@ class _HymnPageState extends State<HymnPage> {
                     );
                   },
                 ),
+    );
+  }
+}
+
+// HymnDetailPage
+class HymnDetailPage extends StatelessWidget {
+  final int hymnId;
+
+  HymnDetailPage({required this.hymnId});
+
+  Future<Map<String, dynamic>> fetchHymnDetails() async {
+    final response = await http.get(
+        Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_hymn?no=$hymnId'));
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load hymn details');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Hymn Details')),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: fetchHymnDetails(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData) {
+            return Center(child: Text('No data found'));
+          } else {
+            final hymn = snapshot.data!;
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(hymn['title'],
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Text(hymn['preview']),
+                  SizedBox(height: 8),
+                  Text('Link: ${hymn['link']}'),
+                  SizedBox(height: 8),
+                  Text('Source: ${hymn['source']}'),
+                  // Add more details as needed
+                ],
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 }
