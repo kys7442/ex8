@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import the package
+import 'package:url_launcher/url_launcher.dart'; // Add this import
 
 Future<void> main() async {
   // 환경 변수를 통해 환경을 결정
@@ -747,6 +748,14 @@ class HymnDetailPage extends StatelessWidget {
     }
   }
 
+  Future<void> _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -773,7 +782,16 @@ class HymnDetailPage extends StatelessWidget {
                   SizedBox(height: 8),
                   Text(hymn['preview']),
                   SizedBox(height: 8),
-                  Text('Link: ${hymn['link']}'),
+                  GestureDetector(
+                    onTap: () => _launchURL(hymn['link']),
+                    child: Text(
+                      'Play on YouTube',
+                      style: TextStyle(
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
                   SizedBox(height: 8),
                   Text('Source: ${hymn['source']}'),
                   // Add more details as needed
@@ -783,6 +801,7 @@ class HymnDetailPage extends StatelessWidget {
           }
         },
       ),
+      bottomNavigationBar: MainPageBottomNavigationBar(selectedIndex: 2),
     );
   }
 }
