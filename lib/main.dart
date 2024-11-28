@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import the package
 
-void main() {
+Future<void> main() async {
+  // 환경 변수를 통해 환경을 결정
+  const String env = String.fromEnvironment('ENV', defaultValue: 'development');
+  await dotenv.load(fileName: 'assets/.env.$env'); // assets 폴더에서 파일 로드
   runApp(MyApp());
 }
 
@@ -49,7 +53,10 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         color: Colors.lightBlueAccent,
         child: Center(
-          child: Image.asset('assets/images/onechapteraday.png', fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+          child: Image.asset('assets/images/onechapteraday.png',
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity),
         ),
       ),
     );
@@ -134,7 +141,8 @@ class HomePage extends StatelessWidget {
             return IconButton(
               icon: Icon(Icons.menu),
               onPressed: () {
-                Scaffold.of(context).openDrawer(); // Builder를 통해 올바른 context를 가져옴
+                Scaffold.of(context)
+                    .openDrawer(); // Builder를 통해 올바른 context를 가져옴
               },
             );
           },
@@ -307,20 +315,24 @@ class _FirstPageState extends State<FirstPage> {
   }
 
   Future<void> fetchBibleBooks() async {
-    final response1 = await http.get(Uri.parse('http://pamp.co.kr/bibles/groupold'));
-    final response2 = await http.get(Uri.parse('http://pamp.co.kr/bibles/groupnew'));
+    final response1 = await http
+        .get(Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_bible?old=true'));
+    final response2 = await http
+        .get(Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_bible?new=true'));
 
     if (response1.statusCode == 200) {
       final List<dynamic> data = json.decode(response1.body);
       setState(() {
-        oldTestamentBooks = data.map((book) => book['book_kor'].toString()).toList();
+        oldTestamentBooks =
+            data.map((book) => book['book_kor'].toString()).toList();
       });
     }
 
     if (response2.statusCode == 200) {
       final List<dynamic> data = json.decode(response2.body);
       setState(() {
-        newTestamentBooks = data.map((book) => book['book_kor'].toString()).toList();
+        newTestamentBooks =
+            data.map((book) => book['book_kor'].toString()).toList();
       });
     }
   }
@@ -387,7 +399,8 @@ class BookGridView extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FirstSubPage(bookName: books[index], bookId: index + 1),
+                  builder: (context) =>
+                      FirstSubPage(bookName: books[index], bookId: index + 1),
                 ),
               );
             },
@@ -429,20 +442,23 @@ class _FirstSubPageState extends State<FirstSubPage> {
 
   Future<void> fetchChapters() async {
     try {
-      final response = await http.get(Uri.parse('http://pamp.co.kr/bibles/chapterGrp/${widget.bookId}'));
+      final response = await http.get(Uri.parse(
+          '${dotenv.env['API_BASE_URL']}/api/api_bible?book_no=${widget.bookId}'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
-          chapters = data.map((chapter) => {
-            'idx': chapter['idx'],
-            'lang': chapter['lang'],
-            'book_no': chapter['book_no'],
-            'book_kor': chapter['book_kor'],
-            'book_eng': chapter['book_eng'],
-            'chapter': chapter['chapter'].toString(),
-            'page': chapter['page'].toString(),
-            'contents': chapter['contents'] ?? '내용 없음',
-          }).toList();
+          chapters = data
+              .map((chapter) => {
+                    'idx': chapter['idx'],
+                    'lang': chapter['lang'],
+                    'book_no': chapter['book_no'],
+                    'book_kor': chapter['book_kor'],
+                    'book_eng': chapter['book_eng'],
+                    'chapter': chapter['chapter'].toString(),
+                    'page': chapter['page'].toString(),
+                    'contents': chapter['contents'] ?? '내용 없음',
+                  })
+              .toList();
           isLoading = false;
         });
       } else {
@@ -474,44 +490,46 @@ class _FirstSubPageState extends State<FirstSubPage> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
-          ? Center(child: Text(errorMessage))
-          : GridView.builder(
-        padding: EdgeInsets.all(3.0),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisSpacing: 2,
-          mainAxisSpacing: 2,
-          crossAxisCount: 3,
-          childAspectRatio: 2 / 1,
-        ),
-        itemCount: chapters.length,
-        itemBuilder: (context, index) {
-          final chapter = chapters[index];
-          return Card(
-            elevation: 2,
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => FirstSub2Page(
-                      bookName: widget.bookName,
-                      bookId: widget.bookId,
-                      chapterId: int.parse(chapter['chapter']),
-                    ),
+              ? Center(child: Text(errorMessage))
+              : GridView.builder(
+                  padding: EdgeInsets.all(3.0),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisSpacing: 2,
+                    mainAxisSpacing: 2,
+                    crossAxisCount: 3,
+                    childAspectRatio: 2 / 1,
                   ),
-                );
-              },
-              child: Center(
-                child: Text(
-                  '${chapter['chapter']}장',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  itemCount: chapters.length,
+                  itemBuilder: (context, index) {
+                    final chapter = chapters[index];
+                    return Card(
+                      elevation: 2,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FirstSub2Page(
+                                bookName: widget.bookName,
+                                bookId: widget.bookId,
+                                chapterId: int.parse(chapter['chapter']),
+                              ),
+                            ),
+                          );
+                        },
+                        child: Center(
+                          child: Text(
+                            '${chapter['chapter']}장',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ),
-            ),
-          );
-        },
-      ),
-      bottomNavigationBar: MainPageBottomNavigationBar(selectedIndex: 1), // 성경책 탭이 선택된 상태로 설정
+      bottomNavigationBar:
+          MainPageBottomNavigationBar(selectedIndex: 1), // 성경책 탭이 선택된 상태로 설정
     );
   }
 }
@@ -521,7 +539,8 @@ class FirstSub2Page extends StatefulWidget {
   final int bookId;
   final int chapterId;
 
-  FirstSub2Page({required this.bookName, required this.bookId, required this.chapterId});
+  FirstSub2Page(
+      {required this.bookName, required this.bookId, required this.chapterId});
 
   @override
   _FirstSub2PageState createState() => _FirstSub2PageState();
@@ -540,22 +559,23 @@ class _FirstSub2PageState extends State<FirstSub2Page> {
 
   Future<void> fetchChapters() async {
     try {
-      // Update the URL to use the bookId and chapterId passed to the page
       final response = await http.get(Uri.parse(
-          'http://pamp.co.kr/bibles/chapterBook/${widget.bookId}/${widget.chapterId}'));
+          '${dotenv.env['API_BASE_URL']}/api/api_bible?N=${widget.bookId}&C=${widget.chapterId}'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
-          chapters = data.map((chapter) => {
-            'idx': chapter['idx'],
-            'lang': chapter['lang'],
-            'book_no': chapter['book_no'],
-            'book_kor': chapter['book_kor'],
-            'book_eng': chapter['book_eng'],
-            'chapter': chapter['chapter'].toString(),
-            'page': chapter['page'].toString(),
-            'contents': chapter['contents'] ?? '내용 없음',
-          }).toList();
+          chapters = data
+              .map((chapter) => {
+                    'idx': chapter['idx'],
+                    'lang': chapter['lang'],
+                    'book_no': chapter['book_no'],
+                    'book_kor': chapter['book_kor'],
+                    'book_eng': chapter['book_eng'],
+                    'chapter': chapter['chapter'].toString(),
+                    'page': chapter['page'].toString(),
+                    'contents': chapter['contents'] ?? '내용 없음',
+                  })
+              .toList();
           isLoading = false;
         });
       } else {
@@ -587,36 +607,41 @@ class _FirstSub2PageState extends State<FirstSub2Page> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
-          ? Center(child: Text(errorMessage))
-          : ListView.builder(
-        padding: EdgeInsets.symmetric(vertical: 4.0), // Reduce vertical padding
-        itemCount: chapters.length,
-        itemBuilder: (context, index) {
-          final chapter = chapters[index]['chapter'];
-          final page = chapters[index]['page'];
-          final contents = chapters[index]['contents'] ?? '내용 없음';
+              ? Center(child: Text(errorMessage))
+              : ListView.builder(
+                  padding: EdgeInsets.symmetric(
+                      vertical: 4.0), // Reduce vertical padding
+                  itemCount: chapters.length,
+                  itemBuilder: (context, index) {
+                    final chapter = chapters[index]['chapter'];
+                    final page = chapters[index]['page'];
+                    final contents = chapters[index]['contents'] ?? '내용 없음';
 
-          return Padding(
-            padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0), // Adjust spacing
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: '$chapter장 $page절 ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  TextSpan(
-                    text: contents,
-                    style: TextStyle(fontWeight: FontWeight.normal),
-                  ),
-                ],
-              ),
-              style: TextStyle(fontSize: 15.0, height: 1.3), // Adjust font size and line height
-            ),
-          );
-        },
-      ),
-      bottomNavigationBar: MainPageBottomNavigationBar(selectedIndex: 1), // 성경책 탭이 선택된 상태로 설정
+                    return Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: 2.0, horizontal: 8.0), // Adjust spacing
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '$chapter장 $page절 ',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            TextSpan(
+                              text: contents,
+                              style: TextStyle(fontWeight: FontWeight.normal),
+                            ),
+                          ],
+                        ),
+                        style: TextStyle(
+                            fontSize: 15.0,
+                            height: 1.3), // Adjust font size and line height
+                      ),
+                    );
+                  },
+                ),
+      bottomNavigationBar:
+          MainPageBottomNavigationBar(selectedIndex: 1), // 성경책 탭이 선택된 상태로 설정
     );
   }
 }
@@ -626,8 +651,8 @@ class HymnPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Hymns')),
-      body: Center(child: Text('Hymn Page Content')),
+      appBar: AppBar(title: Text('찬송가')),
+      body: Center(child: Text('찬송가 페이지')),
     );
   }
 }
@@ -638,26 +663,38 @@ class CommunityPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Community'),
+        title: Text('커뮤니티'),
       ),
       body: ListView(
         children: [
           ListTile(
             title: Text('Community Post 1'),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => CommunityDetailPage(title: 'Community Post 1')));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          CommunityDetailPage(title: 'Community Post 1')));
             },
           ),
           ListTile(
             title: Text('Community Post 2'),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => CommunityDetailPage(title: 'Community Post 2')));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          CommunityDetailPage(title: 'Community Post 2')));
             },
           ),
           ListTile(
             title: Text('Community Post 3'),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => CommunityDetailPage(title: 'Community Post 3')));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          CommunityDetailPage(title: 'Community Post 3')));
             },
           ),
         ],
@@ -730,8 +767,10 @@ class MainPageBottomNavigationBar extends StatelessWidget {
       onTap: (index) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => MainPage(initialIndex: index)), // 선택한 인덱스를 MainPage로 전달
-              (route) => false,
+          MaterialPageRoute(
+              builder: (context) =>
+                  MainPage(initialIndex: index)), // 선택한 인덱스를 MainPage로 전달
+          (route) => false,
         );
       },
     );
