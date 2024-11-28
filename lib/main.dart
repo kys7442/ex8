@@ -647,12 +647,80 @@ class _FirstSub2PageState extends State<FirstSub2Page> {
 }
 
 // Example placeholders for other pages
-class HymnPage extends StatelessWidget {
+class HymnPage extends StatefulWidget {
+  @override
+  _HymnPageState createState() => _HymnPageState();
+}
+
+class _HymnPageState extends State<HymnPage> {
+  List<Map<String, dynamic>> hymns = [];
+  bool isLoading = true;
+  String errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchHymns();
+  }
+
+  Future<void> fetchHymns() async {
+    try {
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_hymn?list'));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        setState(() {
+          hymns = List<Map<String, dynamic>>.from(data['hymns']);
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          errorMessage = '데이터를 가져오는 데 실패했습니다.';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = '에러가 발생했습니다: $e';
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('찬송가')),
-      body: Center(child: Text('찬송가 페이지')),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : errorMessage.isNotEmpty
+              ? Center(child: Text(errorMessage))
+              : GridView.builder(
+                  padding: EdgeInsets.all(8.0),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 5, // 한 줄에 8개의 카드
+                    childAspectRatio: 2 / 1, // 카드의 가로 세로 비율
+                  ),
+                  itemCount: hymns.length,
+                  itemBuilder: (context, index) {
+                    final hymn = hymns[index];
+                    return Card(
+                      elevation: 2,
+                      child: InkWell(
+                        onTap: () {
+                          // 카드 클릭 시 동작 추가 가능
+                        },
+                        child: Center(
+                          child: Text(
+                            hymn['title'],
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
     );
   }
 }
