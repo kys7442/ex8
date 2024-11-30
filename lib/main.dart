@@ -740,7 +740,7 @@ class HymnDetailPage extends StatelessWidget {
 
   Future<Map<String, dynamic>> fetchHymnDetails() async {
     final response = await http.get(
-        Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_hymn?no=$hymnId'));
+        Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_hymn?id=$hymnId'));
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
