@@ -12,19 +12,28 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Bible App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      title: '1일1장',
+      theme: ThemeData.light().copyWith(
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: Colors.grey[850], // 하단 메뉴 바의 배경색을 그레이로 설정
+          backgroundColor: Colors.grey[850],
           selectedItemColor: Colors.white,
           unselectedItemColor: Colors.grey,
         ),
       ),
+      darkTheme: ThemeData.dark().copyWith(
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.grey[850],
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.grey,
+        ),
+      ),
+      themeMode: ThemeMode.system, // 시스템 설정에 따라 테마 변경
       home: SplashScreen(),
     );
   }
@@ -99,9 +108,25 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
+      body: Column(
+        children: [
+          Expanded(
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: _pages.map((page) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10.0), // 광고 영역만큼 패딩 추가
+                  child: page,
+                );
+              }).toList(),
+            ),
+          ),
+          Container(
+            color: Colors.grey[300],
+            height: 50,
+            child: Center(child: Text('Google Ad Placeholder')),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -136,14 +161,13 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: Text('1일1장'),
         leading: Builder(
           builder: (context) {
             return IconButton(
               icon: Icon(Icons.menu),
               onPressed: () {
-                Scaffold.of(context)
-                    .openDrawer(); // Builder를 통해 올바른 context를 가져옴
+                Scaffold.of(context).openDrawer();
               },
             );
           },
@@ -216,31 +240,76 @@ class HomePage extends StatelessWidget {
           ],
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: ListView(
+        padding: EdgeInsets.all(16.0),
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Recent News',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          // 배너 광고 박스
+          Container(
+            height: 100,
+            color: Colors.grey[300],
+            child: Center(child: Text('배너 광고')),
+          ),
+          SizedBox(height: 32),
+
+          // 최근 등록된 찬송가
+          Text('최근 등록된 찬송가',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ...List.generate(
+            5,
+            (index) => ListTile(
+              dense: true,
+              title: Text(
+                '찬송가 제목 ${index + 1}',
+                style: TextStyle(fontSize: 11),
+              ),
             ),
           ),
-          Expanded(
-            child: ListView(
-              children: [
-                ListTile(
-                  title: Text('Latest Bible News Item 1'),
-                ),
-                ListTile(
-                  title: Text('Frequent Verses'),
-                ),
-                ListTile(
-                  title: Text('Popular YouTube Videos'),
-                ),
-              ],
+          SizedBox(height: 32),
+
+          // 최근 추가된 말씀
+          Text('최근 추가된 말씀',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ...List.generate(
+            5,
+            (index) => ListTile(
+              dense: true,
+              title: Text(
+                '말씀 제목 ${index + 1}',
+                style: TextStyle(fontSize: 11),
+              ),
             ),
           ),
+          SizedBox(height: 32),
+
+          // 핫 클릭 말씀
+          Text('핫 클릭 말씀',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ...List.generate(
+            5,
+            (index) => ListTile(
+              dense: true,
+              title: Text(
+                '핫 클릭 말씀 제목 ${index + 1}',
+                style: TextStyle(fontSize: 11),
+              ),
+            ),
+          ),
+          SizedBox(height: 32),
+
+          // 자주보는 성경구절
+          Text('자주보는 성경구절',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ...List.generate(
+            5,
+            (index) => ListTile(
+              dense: true,
+              title: Text(
+                '성경구절 제목 ${index + 1}',
+                style: TextStyle(fontSize: 11),
+              ),
+            ),
+          ),
+          SizedBox(height: 32),
         ],
       ),
     );
@@ -688,6 +757,14 @@ class _HymnPageState extends State<HymnPage> {
     }
   }
 
+  Future<void> _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -696,35 +773,26 @@ class _HymnPageState extends State<HymnPage> {
           ? Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
               ? Center(child: Text(errorMessage))
-              : GridView.builder(
+              : ListView.builder(
                   padding: EdgeInsets.all(8.0),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 5, // 한 줄에 5개의 카드
-                    childAspectRatio: 2 / 1, // 카드의 가로 세로 비율
-                  ),
                   itemCount: hymns.length,
                   itemBuilder: (context, index) {
                     final hymn = hymns[index];
-                    return Card(
-                      elevation: 2,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  HymnDetailPage(hymnId: hymn['id']),
-                            ),
-                          );
-                        },
-                        child: Center(
-                          child: Text(
-                            hymn['title'],
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ),
+                    final lyricsPreview = hymn['lyrics'] != null
+                        ? hymn['lyrics'].substring(0, 30) + '...'
+                        : 'No lyrics available';
+
+                    return ListTile(
+                      title: Text(hymn['title']),
+                      subtitle: Text(
+                        '${hymn['category']} - $lyricsPreview',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                      trailing: Icon(Icons.link),
+                      onTap: () {
+                        _launchURL(hymn['link']);
+                      },
                     );
                   },
                 ),
@@ -918,7 +986,7 @@ class MainPageBottomNavigationBar extends StatelessWidget {
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  MainPage(initialIndex: index)), // 선택한 인덱스를 MainPage로 전달
+                  MainPage(initialIndex: index)), // 선택한 인덱스를 MainPage로 달
           (route) => false,
         );
       },
