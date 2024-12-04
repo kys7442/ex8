@@ -57,7 +57,10 @@ class _HymnPageState extends State<HymnPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('찬송가')),
+      appBar: AppBar(
+        title: Text('찬송가'),
+        centerTitle: true, // 제목을 중앙에 배치
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty

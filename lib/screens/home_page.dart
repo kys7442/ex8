@@ -4,15 +4,30 @@ import 'etc1_page.dart';
 import 'etc2_page.dart';
 import 'etc3_page.dart';
 import 'settings_page.dart';
+import 'login_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool isLoggedIn = false; // 로그인 여부를 저장하는 변수
+
+  void _logout() {
+    setState(() {
+      isLoggedIn = false; // 로그아웃 처리
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('1일1장'),
+        centerTitle: true,
         leading: Builder(
           builder: (context) {
             return IconButton(
@@ -33,6 +48,11 @@ class HomePage extends StatelessWidget {
               );
             },
           ),
+          if (isLoggedIn) // 로그인 된 경우에만 로그아웃 버튼 표시
+            IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: _logout,
+            ),
         ],
       ),
       drawer: Drawer(
@@ -52,10 +72,24 @@ class HomePage extends StatelessWidget {
               leading: Icon(Icons.person),
               title: Text('프로필'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProfilePage()),
-                );
+                if (isLoggedIn) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProfilePage()),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => LoginPage(
+                          onLoginSuccess: () {
+                            setState(() {
+                              isLoggedIn = true;
+                            });
+                          },
+                        )),
+                  );
+                }
               },
             ),
             ListTile(

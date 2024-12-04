@@ -55,7 +55,8 @@ class _BiblePageState extends State<BiblePage> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text("성경"),
+          title: Text("성경책"),
+          centerTitle: true,
           bottom: TabBar(
             tabs: [
               Tab(text: '구약'),
