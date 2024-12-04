@@ -12,7 +12,7 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +41,8 @@ class MyApp extends StatelessWidget {
 
 // SplashScreen
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -77,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen> {
 class MainPage extends StatefulWidget {
   final int initialIndex;
 
-  MainPage({this.initialIndex = 0});
+  const MainPage({super.key, this.initialIndex = 0});
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -157,6 +159,8 @@ class _MainPageState extends State<MainPage> {
 
 // HomePage remains the same
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -318,6 +322,8 @@ class HomePage extends StatelessWidget {
 
 // ProfilePage (프로필 페이지)
 class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -331,6 +337,8 @@ class ProfilePage extends StatelessWidget {
 
 // Etc1Page (메뉴1에 대한 페이지)
 class Etc1Page extends StatelessWidget {
+  const Etc1Page({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -344,6 +352,8 @@ class Etc1Page extends StatelessWidget {
 
 // Etc2Page (메뉴2에 대한 페이지)
 class Etc2Page extends StatelessWidget {
+  const Etc2Page({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -357,6 +367,8 @@ class Etc2Page extends StatelessWidget {
 
 // Etc3Page (메뉴3에 대한 페이지)
 class Etc3Page extends StatelessWidget {
+  const Etc3Page({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -370,6 +382,8 @@ class Etc3Page extends StatelessWidget {
 
 // BiblePage with Tabs
 class FirstPage extends StatefulWidget {
+  const FirstPage({super.key});
+
   @override
   _FirstPageState createState() => _FirstPageState();
 }
@@ -451,7 +465,7 @@ class _FirstPageState extends State<FirstPage> {
 class BookGridView extends StatelessWidget {
   final List<String> books;
 
-  BookGridView({required this.books});
+  const BookGridView({super.key, required this.books});
 
   @override
   Widget build(BuildContext context) {
@@ -493,7 +507,7 @@ class FirstSubPage extends StatefulWidget {
   final String bookName;
   final int bookId;
 
-  FirstSubPage({required this.bookName, required this.bookId});
+  const FirstSubPage({super.key, required this.bookName, required this.bookId});
 
   @override
   _FirstSubPageState createState() => _FirstSubPageState();
@@ -555,7 +569,7 @@ class _FirstSubPageState extends State<FirstSubPage> {
             Navigator.pop(context);
           },
         ),
-        title: Text('${widget.bookName}'),
+        title: Text(widget.bookName),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -609,8 +623,11 @@ class FirstSub2Page extends StatefulWidget {
   final int bookId;
   final int chapterId;
 
-  FirstSub2Page(
-      {required this.bookName, required this.bookId, required this.chapterId});
+  const FirstSub2Page(
+      {super.key,
+      required this.bookName,
+      required this.bookId,
+      required this.chapterId});
 
   @override
   _FirstSub2PageState createState() => _FirstSub2PageState();
@@ -718,6 +735,8 @@ class _FirstSub2PageState extends State<FirstSub2Page> {
 
 // HymnPage
 class HymnPage extends StatefulWidget {
+  const HymnPage({super.key});
+
   @override
   _HymnPageState createState() => _HymnPageState();
 }
@@ -804,7 +823,7 @@ class _HymnPageState extends State<HymnPage> {
 class HymnDetailPage extends StatelessWidget {
   final int hymnId;
 
-  HymnDetailPage({required this.hymnId});
+  const HymnDetailPage({super.key, required this.hymnId});
 
   Future<Map<String, dynamic>> fetchHymnDetails() async {
     final response = await http.get(
@@ -876,6 +895,8 @@ class HymnDetailPage extends StatelessWidget {
 
 // CommunityPage
 class CommunityPage extends StatelessWidget {
+  const CommunityPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -924,7 +945,7 @@ class CommunityPage extends StatelessWidget {
 class CommunityDetailPage extends StatelessWidget {
   final String title;
 
-  CommunityDetailPage({required this.title});
+  const CommunityDetailPage({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -941,9 +962,11 @@ class CommunityDetailPage extends StatelessWidget {
 
 // SettingsPage
 class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 200,
       child: Center(
         child: Text('Settings Page - 추후 구현 예정'),
@@ -956,7 +979,7 @@ class SettingsPage extends StatelessWidget {
 class MainPageBottomNavigationBar extends StatelessWidget {
   final int selectedIndex;
 
-  MainPageBottomNavigationBar({required this.selectedIndex});
+  const MainPageBottomNavigationBar({super.key, required this.selectedIndex});
 
   @override
   Widget build(BuildContext context) {
