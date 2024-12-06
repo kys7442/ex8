@@ -4,6 +4,7 @@ import 'bible_page.dart';
 import 'hymn_page.dart';
 import 'community_page.dart';
 import '../widgets/main_bottom_navigation.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class MainPage extends StatefulWidget {
   final int initialIndex;
@@ -16,11 +17,35 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   late int _selectedIndex;
+  BannerAd? _bannerAd;
+  bool _isBannerAdReady = false;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+
+    _bannerAd = BannerAd(
+      adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+        },
+      ),
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
   }
 
   final List<Widget> _pages = [
@@ -52,14 +77,16 @@ class _MainPageState extends State<MainPage> {
               }).toList(),
             ),
           ),
-          Container(
-            color: Colors.grey[300],
-            height: 50,
-            child: Center(child: Text('Google Ad Placeholder')),
-          ),
+          if (_isBannerAdReady)
+            Container(
+              width: _bannerAd!.size.width.toDouble(),
+              height: _bannerAd!.size.height.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            ),
         ],
       ),
-      bottomNavigationBar: MainPageBottomNavigationBar(selectedIndex: _selectedIndex, onTap: _onItemTapped),
+      bottomNavigationBar: MainPageBottomNavigationBar(
+          selectedIndex: _selectedIndex, onTap: _onItemTapped),
     );
   }
 }

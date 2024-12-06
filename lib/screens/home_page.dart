@@ -5,7 +5,6 @@ import 'etc2_page.dart';
 import 'etc3_page.dart';
 import 'settings_page.dart';
 import 'login_page.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,8 +15,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool isLoggedIn = false; // 로그인 여부를 저장하는 변수
-  BannerAd? _bannerAd; // 배너 광고 객체
-  bool _isBannerAdReady = false; // 광고 준비 여부
 
   void _logout() {
     setState(() {
@@ -28,30 +25,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
-    // 배너 광고 초기화
-    _bannerAd = BannerAd(
-      adUnitId:
-          'ca-app-pub-3940256099942544/6300978111', // 테스트 광고 단위 ID (실제 광고 ID 사용 시 교체 필요)
-      request: AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
-        onAdLoaded: (_) {
-          setState(() {
-            _isBannerAdReady = true;
-          });
-        },
-        onAdFailedToLoad: (ad, error) {
-          //print('Ad failed to load: $error');
-          ad.dispose();
-        },
-      ),
-    )..load();
   }
 
   @override
   void dispose() {
-    _bannerAd?.dispose(); // 광고 해제
     super.dispose();
   }
 
@@ -160,12 +137,6 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
-          if (_isBannerAdReady) // 광고 준비 여부 확인 후 광고 표시
-            Container(
-              width: _bannerAd!.size.width.toDouble(),
-              height: _bannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _bannerAd!),
-            ),
           Expanded(
             child: ListView(
               padding: EdgeInsets.all(16.0),
