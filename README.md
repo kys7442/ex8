@@ -1,4 +1,4 @@
-# ex8
+# com.pamp.bible_1d1c_app
 
 A new Flutter project.
 

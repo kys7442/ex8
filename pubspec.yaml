@@ -1,4 +1,4 @@
-name: ex8
+name: com.pamp.bible_1d1c_app
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -33,7 +33,7 @@ dependencies:
   provider: ^6.0.5
   flutter_svg: ^2.0.14
   http: 1.2.2 # API 호출을 위해 필요한 패키지
-  google_mobile_ads: ^2.0.0
+  google_mobile_ads: ^5.2.0
   flutter_dotenv: ^5.0.2
   webview_flutter: ^4.0.0
   url_launcher: ^6.0.20

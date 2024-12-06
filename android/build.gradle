@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.3.1'  // Keep the classpath as is
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0"  // Keep the Kotlin plugin as is
+    }
+}
+
 allprojects {
     repositories {
         google()

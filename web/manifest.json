@@ -1,6 +1,6 @@
 {
-    "name": "ex8",
-    "short_name": "ex8",
+    "name": "pamp.bible_1d1c_app",
+    "short_name": "bible_1d1c_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
