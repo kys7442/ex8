@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'hymn_detail_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,7 +24,8 @@ class _HymnPageState extends State<HymnPage> {
 
   Future<void> fetchHymns() async {
     try {
-      final response = await http.get(Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_hymn?list'));
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_hymn?list'));
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         setState(() {
@@ -47,8 +47,9 @@ class _HymnPageState extends State<HymnPage> {
   }
 
   Future<void> _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
+    final Uri uri = Uri.parse(url); // String을 Uri로 변환
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri); // launch 대신 launchUrl 사용
     } else {
       throw 'Could not launch $url';
     }
@@ -64,22 +65,22 @@ class _HymnPageState extends State<HymnPage> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
-          ? Center(child: Text(errorMessage))
-          : ListView.builder(
-        padding: EdgeInsets.all(8.0),
-        itemCount: hymns.length,
-        itemBuilder: (context, index) {
-          final hymn = hymns[index];
-          return ListTile(
-            title: Text(hymn['title']),
-            subtitle: Text(hymn['category']), // 추가된 부분: category 출력
-            trailing: Icon(Icons.link),
-            onTap: () {
-              _launchURL(hymn['link']);
-            },
-          );
-        },
-      ),
+              ? Center(child: Text(errorMessage))
+              : ListView.builder(
+                  padding: EdgeInsets.all(8.0),
+                  itemCount: hymns.length,
+                  itemBuilder: (context, index) {
+                    final hymn = hymns[index];
+                    return ListTile(
+                      title: Text(hymn['title']),
+                      subtitle: Text(hymn['category']), // 추가된 부분: category 출력
+                      trailing: Icon(Icons.link),
+                      onTap: () {
+                        _launchURL(hymn['link']);
+                      },
+                    );
+                  },
+                ),
     );
   }
 }

@@ -31,7 +31,8 @@ class _HomePageState extends State<HomePage> {
 
     // 배너 광고 초기화
     _bannerAd = BannerAd(
-      adUnitId: 'ca-app-pub-3940256099942544/6300978111', // 테스트 광고 단위 ID (실제 광고 ID 사용 시 교체 필요)
+      adUnitId:
+          'ca-app-pub-3940256099942544/6300978111', // 테스트 광고 단위 ID (실제 광고 ID 사용 시 교체 필요)
       request: AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
@@ -41,7 +42,7 @@ class _HomePageState extends State<HomePage> {
           });
         },
         onAdFailedToLoad: (ad, error) {
-          print('Ad failed to load: $error');
+          //print('Ad failed to load: $error');
           ad.dispose();
         },
       ),
@@ -114,12 +115,12 @@ class _HomePageState extends State<HomePage> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => LoginPage(
-                          onLoginSuccess: () {
-                            setState(() {
-                              isLoggedIn = true;
-                            });
-                          },
-                        )),
+                              onLoginSuccess: () {
+                                setState(() {
+                                  isLoggedIn = true;
+                                });
+                              },
+                            )),
                   );
                 }
               },
@@ -179,10 +180,11 @@ class _HomePageState extends State<HomePage> {
 
                 // 최근 등록된 찬송가
                 Text('최근 등록된 찬송가',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ...List.generate(
                   5,
-                      (index) => ListTile(
+                  (index) => ListTile(
                     dense: true,
                     title: Text(
                       '찬송가 제목 ${index + 1}',
@@ -194,10 +196,11 @@ class _HomePageState extends State<HomePage> {
 
                 // 최근 추가된 말씀
                 Text('최근 추가된 말씀',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ...List.generate(
                   5,
-                      (index) => ListTile(
+                  (index) => ListTile(
                     dense: true,
                     title: Text(
                       '말씀 제목 ${index + 1}',
@@ -209,10 +212,11 @@ class _HomePageState extends State<HomePage> {
 
                 // 핫 클릭 말씀
                 Text('핫 클릭 말씀',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ...List.generate(
                   5,
-                      (index) => ListTile(
+                  (index) => ListTile(
                     dense: true,
                     title: Text(
                       '핫 클릭 말씀 제목 ${index + 1}',
@@ -224,10 +228,11 @@ class _HomePageState extends State<HomePage> {
 
                 // 자주보는 성경구절
                 Text('자주보는 성경구절',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ...List.generate(
                   5,
-                      (index) => ListTile(
+                  (index) => ListTile(
                     dense: true,
                     title: Text(
                       '성경구절 제목 ${index + 1}',

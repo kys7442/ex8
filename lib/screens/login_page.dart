@@ -4,13 +4,13 @@ import 'profile_page.dart';
 class LoginPage extends StatefulWidget {
   final VoidCallback onLoginSuccess;
 
-  LoginPage({required this.onLoginSuccess});
+  const LoginPage({required this.onLoginSuccess});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 

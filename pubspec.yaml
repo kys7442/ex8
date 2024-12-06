@@ -1,5 +1,6 @@
-name: com.pamp.bible_1d1c_app
-description: "A new Flutter project."
+name: com_pamp_bible_1d1c_app
+package_name: com.pamp.bible_1d1c_app
+description: "bible_1d1c_app."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
