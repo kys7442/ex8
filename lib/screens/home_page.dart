@@ -176,22 +176,6 @@ class HomePageState extends State<HomePage> {
                 ),
                 SizedBox(height: 32),
 
-                // 최근 등록된 찬송가
-                Text('최근 ���록된 찬송가',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ...List.generate(
-                  5,
-                  (index) => ListTile(
-                    dense: true,
-                    title: Text(
-                      '찬송가 제목 ${index + 1}',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 32),
-
                 // 최근 추가된 말씀
                 Text('최근 추가된 말씀',
                     style:
@@ -210,6 +194,22 @@ class HomePageState extends State<HomePage> {
                           '추가 정보: ${wordcard['additionalInfo'] ?? '없음'}'), // 추가 정보 출력
                     );
                   }),
+                SizedBox(height: 32),
+
+                // 최근 등록된 찬송가
+                Text('최근 추가된 찬송가',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ...List.generate(
+                  5,
+                  (index) => ListTile(
+                    dense: true,
+                    title: Text(
+                      '찬송가 제목 ${index + 1}',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                  ),
+                ),
                 SizedBox(height: 32),
 
                 // 핫 클릭 말씀

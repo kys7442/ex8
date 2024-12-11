@@ -4,7 +4,7 @@ import 'profile_page.dart';
 class LoginPage extends StatefulWidget {
   final VoidCallback onLoginSuccess;
 
-  const LoginPage({required this.onLoginSuccess});
+  const LoginPage({super.key, required this.onLoginSuccess});
 
   @override
   LoginPageState createState() => LoginPageState();

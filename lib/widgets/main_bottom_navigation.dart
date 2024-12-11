@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../screens/main_page.dart';
 
 class MainPageBottomNavigationBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onTap;
 
-  const MainPageBottomNavigationBar({super.key, required this.selectedIndex, required this.onTap});
+  const MainPageBottomNavigationBar(
+      {super.key, required this.selectedIndex, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
