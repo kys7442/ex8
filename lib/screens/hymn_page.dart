@@ -72,8 +72,13 @@ class _HymnPageState extends State<HymnPage> {
                   itemBuilder: (context, index) {
                     final hymn = hymns[index];
                     return ListTile(
-                      title: Text(hymn['title']),
-                      subtitle: Text(hymn['category']), // 추가된 부분: category 출력
+                      title: Text('${hymn['title']} - ${hymn['category']} '),
+                      subtitle: Text(
+                        hymn['preview'],
+                        overflow:
+                            TextOverflow.ellipsis, // 텍스트가 넘칠 경우 '...'으로 표시
+                        maxLines: 1, // 최대 1줄로 제한
+                      ),
                       trailing: Icon(Icons.link),
                       onTap: () {
                         _launchURL(hymn['link']);

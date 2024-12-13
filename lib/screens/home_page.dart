@@ -198,12 +198,9 @@ class HomePageState extends State<HomePage> {
                         contentPadding: EdgeInsets.symmetric(
                             vertical: 4.0, horizontal: 16.0),
                         title: Text(
-                          '${wordcard['verse']} ${wordcard['book']} ${wordcard['schapter']}:${wordcard['spage']} ~ ${wordcard['echapter']}:${wordcard['epage']} - ',
+                          '${wordcard['verse']} ${wordcard['book']} ${wordcard['schapter']}:${wordcard['spage']} ~ ${wordcard['echapter']}:${wordcard['epage']}',
                           style: TextStyle(fontSize: 13),
                         ),
-                        subtitle: Text(
-                            '추가 정보: ${wordcard['additionalInfo'] ?? '없음'}',
-                            style: TextStyle(fontSize: 12)),
                       );
                     }),
                   SizedBox(height: 24),
