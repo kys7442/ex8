@@ -24,15 +24,19 @@ class _BiblePageState extends State<BiblePage> {
 
   Future<void> fetchBibleBooks() async {
     try {
-      final response1 = await http.get(Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_bible?old=true'));
-      final response2 = await http.get(Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_bible?new=true'));
+      final response1 = await http.get(
+          Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_bible?old=true'));
+      final response2 = await http.get(
+          Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_bible?new=true'));
 
       if (response1.statusCode == 200 && response2.statusCode == 200) {
         final List<dynamic> oldData = json.decode(response1.body);
         final List<dynamic> newData = json.decode(response2.body);
         setState(() {
-          oldTestamentBooks = oldData.map((book) => book['book_kor'].toString()).toList();
-          newTestamentBooks = newData.map((book) => book['book_kor'].toString()).toList();
+          oldTestamentBooks =
+              oldData.map((book) => book['book_kor'].toString()).toList();
+          newTestamentBooks =
+              newData.map((book) => book['book_kor'].toString()).toList();
           isLoading = false;
         });
       } else {
@@ -52,26 +56,26 @@ class _BiblePageState extends State<BiblePage> {
     return isLoading
         ? Center(child: CircularProgressIndicator())
         : DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("성경책"),
-          centerTitle: true,
-          bottom: TabBar(
-            tabs: [
-              Tab(text: '구약'),
-              Tab(text: '신약'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            BookGridView(books: oldTestamentBooks),
-            BookGridView(books: newTestamentBooks),
-          ],
-        ),
-      ),
-    );
+            length: 2,
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text("성경책"),
+                centerTitle: true,
+                bottom: TabBar(
+                  tabs: [
+                    Tab(text: '구약'),
+                    Tab(text: '신약'),
+                  ],
+                ),
+              ),
+              body: TabBarView(
+                children: [
+                  BookGridView(books: oldTestamentBooks),
+                  BookGridView(books: newTestamentBooks),
+                ],
+              ),
+            ),
+          );
   }
 }
 
@@ -86,8 +90,10 @@ class BookGridView extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          childAspectRatio: 2 / 1,
+          crossAxisCount: 4,
+          childAspectRatio: 4 / 4,
+          mainAxisSpacing: 10.0,
+          crossAxisSpacing: 10.0,
         ),
         itemCount: books.length,
         itemBuilder: (context, index) {
@@ -102,10 +108,27 @@ class BookGridView extends StatelessWidget {
               );
             },
             child: Card(
-              child: Center(
-                child: Text(
-                  books[index],
-                  style: TextStyle(fontSize: 18),
+              elevation: 2.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      books[index][0],
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 4.0),
+                    Text(
+                      books[index],
+                      style: TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             ),

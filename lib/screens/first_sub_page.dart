@@ -34,15 +34,15 @@ class _FirstSubPageState extends State<FirstSubPage> {
         setState(() {
           chapters = data
               .map((chapter) => {
-            'idx': chapter['idx'],
-            'lang': chapter['lang'],
-            'book_no': chapter['book_no'],
-            'book_kor': chapter['book_kor'],
-            'book_eng': chapter['book_eng'],
-            'chapter': chapter['chapter'].toString(),
-            'page': chapter['page'].toString(),
-            'contents': chapter['contents'] ?? '내용 없음',
-          })
+                    'idx': chapter['idx'],
+                    'lang': chapter['lang'],
+                    'book_no': chapter['book_no'],
+                    'book_kor': chapter['book_kor'],
+                    'book_eng': chapter['book_eng'],
+                    'chapter': chapter['chapter'].toString(),
+                    'page': chapter['page'].toString(),
+                    'contents': chapter['contents'] ?? '내용 없음',
+                  })
               .toList();
           isLoading = false;
         });
@@ -75,44 +75,67 @@ class _FirstSubPageState extends State<FirstSubPage> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
-          ? Center(child: Text(errorMessage))
-          : GridView.builder(
-        padding: EdgeInsets.all(3.0),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisSpacing: 2,
-          mainAxisSpacing: 2,
-          crossAxisCount: 3,
-          childAspectRatio: 2 / 1,
-        ),
-        itemCount: chapters.length,
-        itemBuilder: (context, index) {
-          final chapter = chapters[index];
-          return Card(
-            elevation: 2,
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => FirstSub2Page(
-                      bookName: widget.bookName,
-                      bookId: widget.bookId,
-                      chapterId: int.parse(chapter['chapter']),
+              ? Center(child: Text(errorMessage))
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: GridView.builder(
+                    padding: EdgeInsets.zero,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisSpacing: 8.0,
+                      mainAxisSpacing: 8.0,
+                      crossAxisCount: 5,
+                      childAspectRatio: 1,
                     ),
+                    itemCount: chapters.length,
+                    itemBuilder: (context, index) {
+                      final chapter = chapters[index];
+                      return Card(
+                        elevation: 6,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FirstSub2Page(
+                                  bookName: widget.bookName,
+                                  bookId: widget.bookId,
+                                  chapterId: int.parse(chapter['chapter']),
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Color(0xFFF5F5DC),
+                              borderRadius: BorderRadius.circular(12.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 4.0,
+                                  offset: Offset(2, 2),
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: Text(
+                                '${chapter['chapter']}장',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.brown,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-              child: Center(
-                child: Text(
-                  '${chapter['chapter']}장',
-                  style: TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              ),
-            ),
-          );
-        },
-      ),
     );
   }
 }

@@ -10,9 +10,9 @@ class FirstSub2Page extends StatefulWidget {
 
   const FirstSub2Page(
       {super.key,
-        required this.bookName,
-        required this.bookId,
-        required this.chapterId});
+      required this.bookName,
+      required this.bookId,
+      required this.chapterId});
 
   @override
   _FirstSub2PageState createState() => _FirstSub2PageState();
@@ -38,15 +38,15 @@ class _FirstSub2PageState extends State<FirstSub2Page> {
         setState(() {
           chapters = data
               .map((chapter) => {
-            'idx': chapter['idx'],
-            'lang': chapter['lang'],
-            'book_no': chapter['book_no'],
-            'book_kor': chapter['book_kor'],
-            'book_eng': chapter['book_eng'],
-            'chapter': chapter['chapter'].toString(),
-            'page': chapter['page'].toString(),
-            'contents': chapter['contents'] ?? '내용 없음',
-          })
+                    'idx': chapter['idx'],
+                    'lang': chapter['lang'],
+                    'book_no': chapter['book_no'],
+                    'book_kor': chapter['book_kor'],
+                    'book_eng': chapter['book_eng'],
+                    'chapter': chapter['chapter'].toString(),
+                    'page': chapter['page'].toString(),
+                    'contents': chapter['contents'] ?? '내용 없음',
+                  })
               .toList();
           isLoading = false;
         });
@@ -76,41 +76,52 @@ class _FirstSub2PageState extends State<FirstSub2Page> {
         ),
         title: Text('${widget.bookName} ${widget.chapterId}장'),
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : errorMessage.isNotEmpty
-          ? Center(child: Text(errorMessage))
-          : ListView.builder(
-        padding: EdgeInsets.symmetric(
-            vertical: 4.0), // Reduce vertical padding
-        itemCount: chapters.length,
-        itemBuilder: (context, index) {
-          final chapter = chapters[index]['chapter'];
-          final page = chapters[index]['page'];
-          final contents = chapters[index]['contents'] ?? '내용 없음';
+      body: Container(
+        decoration: BoxDecoration(
+          color: Color(0xFFF5F5DC), // 베이지 색상 배경
+        ),
+        child: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : errorMessage.isNotEmpty
+                ? Center(child: Text(errorMessage))
+                : ListView.builder(
+                    padding: EdgeInsets.symmetric(vertical: 4.0),
+                    itemCount: chapters.length,
+                    itemBuilder: (context, index) {
+                      //final chapter = chapters[index]['chapter'];
+                      final page = chapters[index]['page'];
+                      final contents = chapters[index]['contents'] ?? '내용 없음';
 
-          return Padding(
-            padding: EdgeInsets.symmetric(
-                vertical: 2.0, horizontal: 8.0), // Adjust spacing
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: '$chapter장 $page절 ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                      return Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 1.0, horizontal: 8.0),
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '$page절 ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.brown, // 텍스트 색상
+                                ),
+                              ),
+                              TextSpan(
+                                text: contents,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.black87, // 텍스트 색상
+                                ),
+                              ),
+                            ],
+                          ),
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            height: 1, // 줄 간격 조정
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                  TextSpan(
-                    text: contents,
-                    style: TextStyle(fontWeight: FontWeight.normal),
-                  ),
-                ],
-              ),
-              style: TextStyle(
-                  fontSize: 15.0,
-                  height: 1.3), // Adjust font size and line height
-            ),
-          );
-        },
       ),
     );
   }
