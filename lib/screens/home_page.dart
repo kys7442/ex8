@@ -63,12 +63,13 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('1일1장'),
+        title: Text('1일1장',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         centerTitle: true,
         leading: Builder(
           builder: (context) {
             return IconButton(
-              icon: Icon(Icons.menu),
+              icon: Icon(Icons.menu, size: 28),
               onPressed: () {
                 Scaffold.of(context).openDrawer();
               },
@@ -77,7 +78,7 @@ class HomePageState extends State<HomePage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: Icon(Icons.settings, size: 28),
             onPressed: () {
               showModalBottomSheet(
                 context: context,
@@ -85,9 +86,9 @@ class HomePageState extends State<HomePage> {
               );
             },
           ),
-          if (isLoggedIn) // 로그인 된 경우에만 로그아웃 버튼 표시
+          if (isLoggedIn)
             IconButton(
-              icon: Icon(Icons.logout),
+              icon: Icon(Icons.logout, size: 28),
               onPressed: _logout,
             ),
         ],
@@ -102,12 +103,15 @@ class HomePageState extends State<HomePage> {
               ),
               child: Text(
                 'Menu',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold),
               ),
             ),
             ListTile(
-              leading: Icon(Icons.person),
-              title: Text('프로필'),
+              leading: Icon(Icons.person, size: 24),
+              title: Text('프로필', style: TextStyle(fontSize: 16)),
               onTap: () {
                 if (isLoggedIn) {
                   Navigator.push(
@@ -162,91 +166,94 @@ class HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.all(16.0),
-              children: [
-                // 배너 광고 박스
-                Container(
-                  height: 100,
-                  color: Colors.grey[300],
-                  child: Center(child: Text('배너 광고 영역')),
-                ),
-                SizedBox(height: 32),
-
-                // 최근 추가된 말씀
-                Text('최근 추가된 말씀',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                if (isLoading)
-                  Center(child: CircularProgressIndicator())
-                else
-                  ...wordcards.map((wordcard) {
-                    return ListTile(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.all(16.0),
+                children: [
+                  Container(
+                    height: 100,
+                    margin: EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                        child:
+                            Text('배너 광고 영역', style: TextStyle(fontSize: 14))),
+                  ),
+                  SizedBox(height: 24),
+                  Text('최근 추가된 말씀',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  if (isLoading)
+                    Center(child: CircularProgressIndicator())
+                  else
+                    ...wordcards.map((wordcard) {
+                      return ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.symmetric(
+                            vertical: 4.0, horizontal: 16.0),
+                        title: Text(
+                          '${wordcard['verse']} ${wordcard['book']} ${wordcard['schapter']}:${wordcard['spage']} ~ ${wordcard['echapter']}:${wordcard['epage']} - ',
+                          style: TextStyle(fontSize: 13),
+                        ),
+                        subtitle: Text(
+                            '추가 정보: ${wordcard['additionalInfo'] ?? '없음'}',
+                            style: TextStyle(fontSize: 12)),
+                      );
+                    }),
+                  SizedBox(height: 24),
+                  Text('최근 추가된 찬송가',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ...List.generate(
+                    5,
+                    (index) => ListTile(
                       dense: true,
                       title: Text(
-                        '${wordcard['verse']} ${wordcard['book']} ${wordcard['schapter']}:${wordcard['spage']} ~ ${wordcard['echapter']}:${wordcard['epage']} - ',
+                        '찬송가 제목 ${index + 1}',
                         style: TextStyle(fontSize: 11),
                       ),
-                      subtitle: Text(
-                          '추가 정보: ${wordcard['additionalInfo'] ?? '없음'}'), // 추가 정보 출력
-                    );
-                  }),
-                SizedBox(height: 32),
-
-                // 최근 등록된 찬송가
-                Text('최근 추가된 찬송가',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ...List.generate(
-                  5,
-                  (index) => ListTile(
-                    dense: true,
-                    title: Text(
-                      '찬송가 제목 ${index + 1}',
-                      style: TextStyle(fontSize: 11),
                     ),
                   ),
-                ),
-                SizedBox(height: 32),
-
-                // 핫 클릭 말씀
-                Text('핫 클릭 말씀',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ...List.generate(
-                  5,
-                  (index) => ListTile(
-                    dense: true,
-                    title: Text(
-                      '핫 클릭 말씀 제목 ${index + 1}',
-                      style: TextStyle(fontSize: 11),
+                  SizedBox(height: 32),
+                  Text('핫 클릭 말씀',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ...List.generate(
+                    5,
+                    (index) => ListTile(
+                      dense: true,
+                      title: Text(
+                        '핫 클릭 말씀 제목 ${index + 1}',
+                        style: TextStyle(fontSize: 11),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 32),
-
-                // 자주보는 성경구절
-                Text('자주보는 성경구절',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ...List.generate(
-                  5,
-                  (index) => ListTile(
-                    dense: true,
-                    title: Text(
-                      '성경구절 제목 ${index + 1}',
-                      style: TextStyle(fontSize: 11),
+                  SizedBox(height: 32),
+                  Text('자주보는 성경구절',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ...List.generate(
+                    5,
+                    (index) => ListTile(
+                      dense: true,
+                      title: Text(
+                        '성경구절 제목 ${index + 1}',
+                        style: TextStyle(fontSize: 11),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 32),
-              ],
+                  SizedBox(height: 32),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
