@@ -19,6 +19,7 @@ class HomePageState extends State<HomePage> {
   bool isLoggedIn = false; // 로그인 여부를 저장하는 변수
   List<Map<String, dynamic>> wordcards = []; // 말씀 데이터를 저장할 리스트
   bool isLoading = true; // 로딩 상태를 나타내는 변수
+  Map<String, dynamic> data = {}; // 데이터를 저장할 변수 추가
 
   void _logout() {
     setState(() {
@@ -29,17 +30,18 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    fetchWordcards(); // 말씀 데이터를 가져오는 함수 호출
+    fetchHomeData(); // 새로운 데이터 가져오는 함수 호출
   }
 
-  Future<void> fetchWordcards() async {
+  Future<void> fetchHomeData() async {
     try {
-      final response = await http
-          .get(Uri.parse('http://localhost:3000/api/api_wordcards?no=1'));
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/api/getHomeData'));
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
+        final Map<String, dynamic> fetchedData = json.decode(response.body);
         setState(() {
-          wordcards = List<Map<String, dynamic>>.from(data['wordcards']);
+          wordcards = [fetchedData['recommendedWordcard']];
+          data = fetchedData; // 데이터를 상태로 저장
           isLoading = false;
         });
       } else {
@@ -186,65 +188,59 @@ class HomePageState extends State<HomePage> {
                             Text('배너 광고 영역', style: TextStyle(fontSize: 14))),
                   ),
                   SizedBox(height: 24),
-                  Text('최근 추가된 말씀',
+                  Text('오늘 추천 말씀카드',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   if (isLoading)
                     Center(child: CircularProgressIndicator())
                   else
-                    ...wordcards.map((wordcard) {
+                    ListTile(
+                      dense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                      title: Text(
+                        '${wordcards[0]['verse']} ${wordcards[0]['book']} ${wordcards[0]['schapter']}:${wordcards[0]['spage']} ~ ${wordcards[0]['echapter']}:${wordcards[0]['epage']}',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  SizedBox(height: 24),
+                  Text('오늘 추천 찬송가',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  if (data.isNotEmpty)
+                    ListTile(
+                      dense: true,
+                      title: Text(
+                        data['recommendedHymn']['title'],
+                        style: TextStyle(fontSize: 11),
+                      ),
+                    ),
+                  SizedBox(height: 32),
+                  Text('많이 본 말씀',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  if (data.isNotEmpty)
+                    ListTile(
+                      dense: true,
+                      title: Text(
+                        data['mostViewedBible']['contents'],
+                        style: TextStyle(fontSize: 11),
+                      ),
+                    ),
+                  SizedBox(height: 32),
+                  Text('기도실(중보)',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  if (data.isNotEmpty)
+                    ...data['recentCommunities'].map((community) {
                       return ListTile(
                         dense: true,
-                        contentPadding: EdgeInsets.symmetric(
-                            vertical: 4.0, horizontal: 16.0),
                         title: Text(
-                          '${wordcard['verse']} ${wordcard['book']} ${wordcard['schapter']}:${wordcard['spage']} ~ ${wordcard['echapter']}:${wordcard['epage']}',
-                          style: TextStyle(fontSize: 13),
+                          community['title'],
+                          style: TextStyle(fontSize: 11),
                         ),
                       );
-                    }),
-                  SizedBox(height: 24),
-                  Text('최근 추가된 찬송가',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ...List.generate(
-                    5,
-                    (index) => ListTile(
-                      dense: true,
-                      title: Text(
-                        '찬송가 제목 ${index + 1}',
-                        style: TextStyle(fontSize: 11),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 32),
-                  Text('핫 클릭 말씀',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ...List.generate(
-                    5,
-                    (index) => ListTile(
-                      dense: true,
-                      title: Text(
-                        '핫 클릭 말씀 제목 ${index + 1}',
-                        style: TextStyle(fontSize: 11),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 32),
-                  Text('자주보는 성경구절',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ...List.generate(
-                    5,
-                    (index) => ListTile(
-                      dense: true,
-                      title: Text(
-                        '성경구절 제목 ${index + 1}',
-                        style: TextStyle(fontSize: 11),
-                      ),
-                    ),
-                  ),
+                    }).toList(),
                   SizedBox(height: 32),
                 ],
               ),
