@@ -42,6 +42,20 @@ class CommunityPageState extends State<CommunityPage> {
     }
   }
 
+  String _getMaskedAuthor(String author) {
+    List<String> names = author.split(' ');
+    if (names.length > 2) {
+      // 가운데 이름을 가립니다.
+      names[1] = names[1][0] + '.'; // 예: "John D. Doe"
+    }
+    return names.join(' ');
+  }
+
+  String _formatDate(String dateTime) {
+    DateTime parsedDate = DateTime.parse(dateTime);
+    return '${parsedDate.year}-${parsedDate.month}-${parsedDate.day}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +67,9 @@ class CommunityPageState extends State<CommunityPage> {
               itemBuilder: (context, index) {
                 final community = communities[index];
                 return ListTile(
-                  title: Text(community['title']),
+                  title: Text(
+                    '${community['title']} - ${_getMaskedAuthor(community['author'])} - ${_formatDate(community['created_at'])}',
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,
