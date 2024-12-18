@@ -5,6 +5,7 @@ import 'hymn_page.dart';
 import 'community_page.dart';
 import '../widgets/main_bottom_navigation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MainPage extends StatefulWidget {
   final int initialIndex;

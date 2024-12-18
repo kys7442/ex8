@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'community_detail_page.dart';
 import 'sign_up_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -37,8 +38,8 @@ class HomePageState extends State<HomePage> {
 
   Future<void> fetchHomeData() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://localhost:3000/api/getHomeData'));
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_BASE_URL']}/api/getHomeData'));
       if (response.statusCode == 200) {
         final Map<String, dynamic> fetchedData = json.decode(response.body);
         setState(() {

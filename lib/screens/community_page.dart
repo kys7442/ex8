@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'community_detail_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CommunityPage extends StatefulWidget {
   const CommunityPage({super.key});
@@ -22,8 +23,8 @@ class CommunityPageState extends State<CommunityPage> {
 
   Future<void> fetchCommunityData() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://localhost:3000/api/community'));
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_BASE_URL']}/api/community'));
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         setState(() {
