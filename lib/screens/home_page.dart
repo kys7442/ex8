@@ -5,9 +5,10 @@ import 'etc2_page.dart';
 import 'etc3_page.dart';
 import 'settings_page.dart';
 import 'login_page.dart';
-import 'sign_up_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'community_detail_page.dart';
+import 'sign_up_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -266,12 +267,38 @@ class HomePageState extends State<HomePage> {
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   if (data.isNotEmpty)
                     ...data['recentCommunities'].map((community) {
+                      String maskedAuthor = community['author'].replaceRange(
+                          1,
+                          community['author'].length - 1,
+                          '*' * (community['author'].length - 2));
                       return ListTile(
                         dense: true,
                         title: Text(
                           community['title'],
                           style: TextStyle(fontSize: 11),
                         ),
+                        subtitle: Text(
+                          '등록자: $maskedAuthor\n등록일자: ${community['created_at']}\n댓글수: ${community['comments_count']}',
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CommunityDetailPage(
+                                communityId: community['id'],
+                                title: community['title'],
+                                content: community['content'],
+                                author: community['author'],
+                                createdAt:
+                                    DateTime.parse(community['created_at'])
+                                        .toLocal()
+                                        .toString()
+                                        .split(' ')[0],
+                              ),
+                            ),
+                          );
+                        },
                       );
                     }).toList(),
                   SizedBox(height: 32),

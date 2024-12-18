@@ -7,10 +7,10 @@ class CommunityPage extends StatefulWidget {
   const CommunityPage({super.key});
 
   @override
-  _CommunityPageState createState() => _CommunityPageState();
+  CommunityPageState createState() => CommunityPageState();
 }
 
-class _CommunityPageState extends State<CommunityPage> {
+class CommunityPageState extends State<CommunityPage> {
   List<Map<String, dynamic>> communities = [];
   bool isLoading = true;
 
@@ -63,6 +63,7 @@ class _CommunityPageState extends State<CommunityPage> {
                           content: community['content'],
                           author: community['author'],
                           createdAt: community['created_at'],
+                          communityId: community['id'],
                           // 필요한 경우 다른 데이터도 전달
                         ),
                       ),
