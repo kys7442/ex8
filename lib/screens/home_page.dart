@@ -5,6 +5,7 @@ import 'etc2_page.dart';
 import 'etc3_page.dart';
 import 'settings_page.dart';
 import 'login_page.dart';
+import 'sign_up_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -80,7 +81,7 @@ class HomePageState extends State<HomePage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings, size: 28),
+            icon: Icon(Icons.info, size: 28),
             onPressed: () {
               showModalBottomSheet(
                 context: context,
@@ -133,6 +134,38 @@ class HomePageState extends State<HomePage> {
                             )),
                   );
                 }
+              },
+            ),
+            ListTile(
+              leading: Icon(isLoggedIn ? Icons.logout : Icons.login, size: 24),
+              title: Text(isLoggedIn ? '로그아웃' : '로그인',
+                  style: TextStyle(fontSize: 16)),
+              onTap: () {
+                if (isLoggedIn) {
+                  _logout();
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => LoginPage(
+                              onLoginSuccess: () {
+                                setState(() {
+                                  isLoggedIn = true;
+                                });
+                              },
+                            )),
+                  );
+                }
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.app_registration, size: 24),
+              title: Text('회원가입', style: TextStyle(fontSize: 16)),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignUpPage()),
+                );
               },
             ),
             ListTile(
