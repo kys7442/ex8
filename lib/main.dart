@@ -4,9 +4,11 @@ import 'screens/splash_screen.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   const String env = String.fromEnvironment('ENV', defaultValue: 'development');
   await dotenv.load(fileName: 'assets/.env.$env');
-  MobileAds.instance.initialize(); // 광고 SDK 초기화
+  MobileAds.instance.initialize();
+
   runApp(MyApp());
 }
 
