@@ -5,7 +5,6 @@ import 'hymn_page.dart';
 import 'community_page.dart';
 import '../widgets/main_bottom_navigation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MainPage extends StatefulWidget {
   final int initialIndex;
@@ -13,10 +12,10 @@ class MainPage extends StatefulWidget {
   const MainPage({super.key, this.initialIndex = 0});
 
   @override
-  _MainPageState createState() => _MainPageState();
+  MainPageState createState() => MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class MainPageState extends State<MainPage> {
   late int _selectedIndex;
   BannerAd? _bannerAd;
   bool _isBannerAdReady = false;
