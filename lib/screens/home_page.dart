@@ -172,7 +172,7 @@ class HomePageState extends State<HomePage> {
             ),
             ListTile(
               leading: Icon(Icons.menu_book),
-              title: Text('메뉴1'),
+              title: Text('말씀카드'),
               onTap: () {
                 Navigator.push(
                   context,
@@ -182,7 +182,7 @@ class HomePageState extends State<HomePage> {
             ),
             ListTile(
               leading: Icon(Icons.menu),
-              title: Text('메뉴2'),
+              title: Text('많이본성경'),
               onTap: () {
                 Navigator.push(
                   context,
@@ -192,7 +192,7 @@ class HomePageState extends State<HomePage> {
             ),
             ListTile(
               leading: Icon(Icons.menu),
-              title: Text('메뉴3'),
+              title: Text('후원보기'),
               onTap: () {
                 Navigator.push(
                   context,
