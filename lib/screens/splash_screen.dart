@@ -28,10 +28,27 @@ class SplashScreenState extends State<SplashScreen> {
       body: Container(
         color: Colors.lightBlueAccent,
         child: Center(
-          child: Image.asset('assets/images/onechapteraday.png',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '1일 1장',
+                style: TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                '매일 1장(Chapter)의 성경 읽기',
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
