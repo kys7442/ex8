@@ -30,9 +30,18 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  void _checkLoginStatus() async {
+    // API를 통해 로그인 상태를 확인하는 로직 추가
+    // 예시: isLoggedIn = await checkLoginStatusFromAPI();
+    setState(() {
+      isLoggedIn = true; // 실제 API 결과에 따라 설정
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _checkLoginStatus(); // 로그인 상태 확인
     fetchHomeData(); // 새로운 데이터 가져오는 함수 호출
   }
 
@@ -114,30 +123,17 @@ class HomePageState extends State<HomePage> {
                     fontWeight: FontWeight.bold),
               ),
             ),
-            ListTile(
-              leading: Icon(Icons.person, size: 24),
-              title: Text('프로필', style: TextStyle(fontSize: 16)),
-              onTap: () {
-                if (isLoggedIn) {
+            if (isLoggedIn)
+              ListTile(
+                leading: Icon(Icons.person, size: 24),
+                title: Text('프로필', style: TextStyle(fontSize: 16)),
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => ProfilePage()),
                   );
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => LoginPage(
-                              onLoginSuccess: () {
-                                setState(() {
-                                  isLoggedIn = true;
-                                });
-                              },
-                            )),
-                  );
-                }
-              },
-            ),
+                },
+              ),
             ListTile(
               leading: Icon(isLoggedIn ? Icons.logout : Icons.login, size: 24),
               title: Text(isLoggedIn ? '로그아웃' : '로그인',
@@ -160,16 +156,17 @@ class HomePageState extends State<HomePage> {
                 }
               },
             ),
-            ListTile(
-              leading: Icon(Icons.app_registration, size: 24),
-              title: Text('회원가입', style: TextStyle(fontSize: 16)),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignUpPage()),
-                );
-              },
-            ),
+            if (!isLoggedIn)
+              ListTile(
+                leading: Icon(Icons.app_registration, size: 24),
+                title: Text('회원가입', style: TextStyle(fontSize: 16)),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignUpPage()),
+                  );
+                },
+              ),
             ListTile(
               leading: Icon(Icons.menu_book),
               title: Text('말씀카드'),
