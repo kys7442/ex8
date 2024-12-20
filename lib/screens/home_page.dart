@@ -23,6 +23,7 @@ class HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> wordcards = []; // 말씀 데이터를 저장할 리스트
   bool isLoading = true; // 로딩 상태를 나타내는 변수
   Map<String, dynamic> data = {}; // 데이터를 저장할 변수 추가
+  String authToken = ''; // 인증 토큰을 저장할 변수 추가
 
   void _logout() {
     setState(() {
@@ -31,11 +32,33 @@ class HomePageState extends State<HomePage> {
   }
 
   void _checkLoginStatus() async {
-    // API를 통해 로그인 상태를 확인하는 로직 추가
-    // 예시: isLoggedIn = await checkLoginStatusFromAPI();
-    setState(() {
-      isLoggedIn = true; // 실제 API 결과에 따라 설정
-    });
+    try {
+      // 서버에서 로그인 상태를 확인할 수 있는 엔드포인트로 요청을 보냅니다.
+      final response = await http.get(
+        Uri.parse('${dotenv.env['API_BASE_URL']}/api/checkLoginStatus'),
+        headers: {
+          'Authorization': 'Bearer $authToken', // 인증 토큰을 헤더에 포함
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // 서버가 로그인 상태를 반환하면, 그에 따라 isLoggedIn을 설정합니다.
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        setState(() {
+          isLoggedIn = responseData['isLoggedIn'];
+        });
+      } else {
+        // 서버가 200이 아닌 상태 코드를 반환하면, 로그아웃 상태로 설정합니다.
+        setState(() {
+          isLoggedIn = false;
+        });
+      }
+    } catch (e) {
+      // 네트워크 오류 등 예외가 발생하면 로그아웃 상태로 설정합니다.
+      setState(() {
+        isLoggedIn = false;
+      });
+    }
   }
 
   @override
