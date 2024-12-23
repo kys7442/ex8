@@ -27,6 +27,10 @@ class MainPageBottomNavigationBar extends StatelessWidget {
           icon: _buildIcon('assets/images/prayer.png', Icons.people),
           label: '중보기도실',
         ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.shopping_cart, size: 24),
+          label: '쇼핑몰',
+        ),
       ],
       currentIndex: selectedIndex,
       selectedItemColor: Colors.blueAccent,

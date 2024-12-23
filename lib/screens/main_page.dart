@@ -5,6 +5,7 @@ import 'hymn_page.dart';
 import 'community_page.dart';
 import '../widgets/main_bottom_navigation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'shopping.dart';
 
 class MainPage extends StatefulWidget {
   final int initialIndex;
@@ -53,6 +54,7 @@ class MainPageState extends State<MainPage> {
     BiblePage(),
     HymnPage(),
     CommunityPage(),
+    ShoppingPage(),
   ];
 
   void _onItemTapped(int index) {
