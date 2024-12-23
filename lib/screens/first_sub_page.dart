@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'first_sub2_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FirstSubPage extends StatefulWidget {
   final String bookName;
@@ -18,11 +19,13 @@ class _FirstSubPageState extends State<FirstSubPage> {
   List<Map<String, dynamic>> chapters = [];
   bool isLoading = true;
   String errorMessage = '';
+  Set<String> readChapters = {};
 
   @override
   void initState() {
     super.initState();
     fetchChapters();
+    loadReadChapters();
   }
 
   Future<void> fetchChapters() async {
@@ -60,6 +63,23 @@ class _FirstSubPageState extends State<FirstSubPage> {
     }
   }
 
+  Future<void> loadReadChapters() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      readChapters =
+          prefs.getStringList('readChapters_${widget.bookId}')?.toSet() ?? {};
+    });
+  }
+
+  Future<void> markChapterAsRead(String chapter) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      readChapters.add(chapter);
+    });
+    await prefs.setStringList(
+        'readChapters_${widget.bookId}', readChapters.toList());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,6 +109,7 @@ class _FirstSubPageState extends State<FirstSubPage> {
                     itemCount: chapters.length,
                     itemBuilder: (context, index) {
                       final chapter = chapters[index];
+                      final isRead = readChapters.contains(chapter['chapter']);
                       return Card(
                         elevation: 6,
                         shape: RoundedRectangleBorder(
@@ -96,6 +117,7 @@ class _FirstSubPageState extends State<FirstSubPage> {
                         ),
                         child: InkWell(
                           onTap: () {
+                            markChapterAsRead(chapter['chapter']);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -109,7 +131,9 @@ class _FirstSubPageState extends State<FirstSubPage> {
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Color(0xFFF5F5DC),
+                              color: isRead
+                                  ? Colors.green[100]
+                                  : Color(0xFFF5F5DC),
                               borderRadius: BorderRadius.circular(12.0),
                               boxShadow: [
                                 BoxShadow(

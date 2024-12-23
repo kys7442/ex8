@@ -11,6 +11,9 @@ import 'community_detail_page.dart';
 import 'sign_up_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'hymn_detail_page.dart';
+import 'first_sub2_page.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,6 +28,9 @@ class HomePageState extends State<HomePage> {
   bool isLoading = true; // 로딩 상태를 나타내는 변수
   Map<String, dynamic> data = {}; // 데이터를 저장할 변수 추가
   String authToken = ''; // 인증 토큰을 저장할 변수 추가
+
+  BannerAd? _bannerAd;
+  bool _isBannerAdReady = true;
 
   void _logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -77,6 +83,28 @@ class HomePageState extends State<HomePage> {
     super.initState();
     _checkLoginStatus(); // 로그인 상태 확인
     fetchHomeData(); // 새로운 데이터 가져오는 함수 호출
+    _loadBannerAd(); // 배너 광고 로드
+  }
+
+  void _loadBannerAd() {
+    _bannerAd = BannerAd(
+      adUnitId: 'YOUR_AD_UNIT_ID', // 실제 광고 단위 ID로 변경
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          setState(() {
+            _isBannerAdReady = false;
+          });
+        },
+      ),
+    )..load();
   }
 
   Future<void> fetchHomeData() async {
@@ -104,6 +132,7 @@ class HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -158,78 +187,104 @@ class HomePageState extends State<HomePage> {
               ),
             ),
             if (isLoggedIn)
-              ListTile(
-                leading: Icon(Icons.person, size: 24),
-                title: Text('프로필', style: TextStyle(fontSize: 16)),
+              Card(
+                margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                elevation: 4.0,
+                child: ListTile(
+                  leading: Icon(Icons.person, size: 24),
+                  title: Text('프로필', style: TextStyle(fontSize: 16)),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfilePage()),
+                    );
+                  },
+                ),
+              ),
+            Card(
+              margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              elevation: 4.0,
+              child: ListTile(
+                leading:
+                    Icon(isLoggedIn ? Icons.logout : Icons.login, size: 24),
+                title: Text(isLoggedIn ? '로그아웃' : '로그인',
+                    style: TextStyle(fontSize: 16)),
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProfilePage()),
-                  );
+                  if (isLoggedIn) {
+                    _logout();
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LoginPage(
+                          onLoginSuccess: () {
+                            setState(() {
+                              isLoggedIn = true;
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  }
                 },
               ),
-            ListTile(
-              leading: Icon(isLoggedIn ? Icons.logout : Icons.login, size: 24),
-              title: Text(isLoggedIn ? '로그아웃' : '로그인',
-                  style: TextStyle(fontSize: 16)),
-              onTap: () {
-                if (isLoggedIn) {
-                  _logout();
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => LoginPage(
-                              onLoginSuccess: () {
-                                setState(() {
-                                  isLoggedIn = true;
-                                });
-                              },
-                            )),
-                  );
-                }
-              },
             ),
             if (!isLoggedIn)
-              ListTile(
-                leading: Icon(Icons.app_registration, size: 24),
-                title: Text('회원가입', style: TextStyle(fontSize: 16)),
+              Card(
+                margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                elevation: 4.0,
+                child: ListTile(
+                  leading: Icon(Icons.app_registration, size: 24),
+                  title: Text('회원가입', style: TextStyle(fontSize: 16)),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignUpPage()),
+                    );
+                  },
+                ),
+              ),
+            Card(
+              margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              elevation: 4.0,
+              child: ListTile(
+                leading: Icon(Icons.menu_book),
+                title: Text('말씀카드'),
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SignUpPage()),
+                    MaterialPageRoute(builder: (context) => Etc1Page()),
                   );
                 },
               ),
-            ListTile(
-              leading: Icon(Icons.menu_book),
-              title: Text('말씀카드'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Etc1Page()),
-                );
-              },
             ),
-            ListTile(
-              leading: Icon(Icons.menu),
-              title: Text('많이본성경'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Etc2Page()),
-                );
-              },
+            Card(
+              margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              elevation: 4.0,
+              child: ListTile(
+                leading: Icon(Icons.menu),
+                title: Text('많이본성경'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Etc2Page()),
+                  );
+                },
+              ),
             ),
-            ListTile(
-              leading: Icon(Icons.menu),
-              title: Text('후원보기'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Etc3Page()),
-                );
-              },
+            Card(
+              margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              elevation: 4.0,
+              child: ListTile(
+                leading: Icon(Icons.menu),
+                title: Text('후원보기'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Etc3Page()),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -238,6 +293,12 @@ class HomePageState extends State<HomePage> {
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
         child: Column(
           children: [
+            if (_isBannerAdReady)
+              SizedBox(
+                height: _bannerAd!.size.height.toDouble(),
+                width: _bannerAd!.size.width.toDouble(),
+                child: AdWidget(ad: _bannerAd!),
+              ),
             Expanded(
               child: ListView(
                 padding: EdgeInsets.all(16.0),
@@ -251,7 +312,7 @@ class HomePageState extends State<HomePage> {
                     ),
                     child: Center(
                         child:
-                            Text('배너 광고 영역', style: TextStyle(fontSize: 14))),
+                            Text('배너 광고 영역', style: TextStyle(fontSize: 16))),
                   ),
                   SizedBox(height: 24),
                   Text('오늘 추천 말씀카드',
@@ -260,13 +321,16 @@ class HomePageState extends State<HomePage> {
                   if (isLoading)
                     Center(child: CircularProgressIndicator())
                   else
-                    ListTile(
-                      dense: true,
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
-                      title: Text(
-                        '${wordcards[0]['verse']} ${wordcards[0]['book']} ${wordcards[0]['schapter']}:${wordcards[0]['spage']} ~ ${wordcards[0]['echapter']}:${wordcards[0]['epage']}',
-                        style: TextStyle(fontSize: 13),
+                    Card(
+                      margin:
+                          EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      elevation: 4.0,
+                      child: ListTile(
+                        dense: true,
+                        title: Text(
+                          '${wordcards[0]['verse']} ${wordcards[0]['book']} ${wordcards[0]['schapter']}:${wordcards[0]['spage']} ~ ${wordcards[0]['echapter']}:${wordcards[0]['epage']}',
+                          style: TextStyle(fontSize: 16),
+                        ),
                       ),
                     ),
                   SizedBox(height: 24),
@@ -274,11 +338,26 @@ class HomePageState extends State<HomePage> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   if (data.isNotEmpty)
-                    ListTile(
-                      dense: true,
-                      title: Text(
-                        data['recommendedHymn']['title'],
-                        style: TextStyle(fontSize: 11),
+                    Card(
+                      margin:
+                          EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      elevation: 4.0,
+                      child: ListTile(
+                        dense: true,
+                        title: Text(
+                          data['recommendedHymn']['title'],
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HymnDetailPage(
+                                hymnId: data['recommendedHymn']['id'],
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   SizedBox(height: 32),
@@ -286,11 +365,28 @@ class HomePageState extends State<HomePage> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   if (data.isNotEmpty)
-                    ListTile(
-                      dense: true,
-                      title: Text(
-                        data['mostViewedBible']['contents'],
-                        style: TextStyle(fontSize: 11),
+                    Card(
+                      margin:
+                          EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      elevation: 4.0,
+                      child: ListTile(
+                        dense: true,
+                        title: Text(
+                          data['mostViewedBible']['contents'],
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FirstSub2Page(
+                                bookName: data['mostViewedBible']['book_kor'],
+                                bookId: data['mostViewedBible']['book_no'],
+                                chapterId: data['mostViewedBible']['chapter'],
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   SizedBox(height: 32),
@@ -303,34 +399,39 @@ class HomePageState extends State<HomePage> {
                           1,
                           community['author'].length - 1,
                           '*' * (community['author'].length - 2));
-                      return ListTile(
-                        dense: true,
-                        title: Text(
-                          community['title'],
-                          style: TextStyle(fontSize: 11),
-                        ),
-                        subtitle: Text(
-                          '등록자: $maskedAuthor\n등록일자: ${community['created_at']}\n댓글수: ${community['comments_count']}',
-                          style: TextStyle(fontSize: 11),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CommunityDetailPage(
-                                communityId: community['id'],
-                                title: community['title'],
-                                content: community['content'],
-                                author: community['author'],
-                                createdAt:
-                                    DateTime.parse(community['created_at'])
-                                        .toLocal()
-                                        .toString()
-                                        .split(' ')[0],
+                      return Card(
+                        margin: EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 18.0),
+                        elevation: 4.0,
+                        child: ListTile(
+                          dense: true,
+                          title: Text(
+                            community['title'],
+                            style: TextStyle(fontSize: 14),
+                          ),
+                          subtitle: Text(
+                            '등록자: $maskedAuthor\n등록일자: ${community['created_at']}\n댓글수: ${community['comments_count']}',
+                            style: TextStyle(fontSize: 14),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CommunityDetailPage(
+                                  communityId: community['id'],
+                                  title: community['title'],
+                                  content: community['content'],
+                                  author: community['author'],
+                                  createdAt:
+                                      DateTime.parse(community['created_at'])
+                                          .toLocal()
+                                          .toString()
+                                          .split(' ')[0],
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       );
                     }).toList(),
                   SizedBox(height: 32),

@@ -47,7 +47,7 @@ class CommunityPageState extends State<CommunityPage> {
     List<String> names = author.split(' ');
     if (names.length > 2) {
       // 가운데 이름을 가립니다.
-      names[1] = names[1][0] + '.'; // 예: "John D. Doe"
+      names[1] = '${names[1][0]}.'; // 예: "John D. Doe"
     }
     return names.join(' ');
   }

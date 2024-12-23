@@ -8,13 +8,13 @@ class CommunityDetailPage extends StatelessWidget {
   final String createdAt;
 
   const CommunityDetailPage({
-    Key? key,
+    super.key,
     required this.communityId,
     required this.title,
     required this.content,
     required this.author,
     required this.createdAt,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

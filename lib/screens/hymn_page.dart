@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'hymn_detail_page.dart';
 
 class HymnPage extends StatefulWidget {
   const HymnPage({super.key});
@@ -72,16 +73,27 @@ class _HymnPageState extends State<HymnPage> {
                   itemBuilder: (context, index) {
                     final hymn = hymns[index];
                     return ListTile(
-                      title: Text('${hymn['title']} - ${hymn['category']} '),
+                      title: Text('${hymn['title']} - ${hymn['category']}'),
                       subtitle: Text(
                         hymn['preview'],
-                        overflow:
-                            TextOverflow.ellipsis, // 텍스트가 넘칠 경우 '...'으로 표시
-                        maxLines: 1, // 최대 1줄로 제한
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
-                      trailing: Icon(Icons.link),
+                      trailing: IconButton(
+                        icon: Icon(Icons.link),
+                        onPressed: () {
+                          _launchURL(hymn['link']);
+                        },
+                      ),
                       onTap: () {
-                        _launchURL(hymn['link']);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HymnDetailPage(
+                              hymnId: hymn['id'], // 찬송가 ID 전달
+                            ),
+                          ),
+                        );
                       },
                     );
                   },
