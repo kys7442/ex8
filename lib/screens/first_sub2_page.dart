@@ -15,10 +15,10 @@ class FirstSub2Page extends StatefulWidget {
       required this.chapterId});
 
   @override
-  _FirstSub2PageState createState() => _FirstSub2PageState();
+  FirstSub2PageState createState() => FirstSub2PageState();
 }
 
-class _FirstSub2PageState extends State<FirstSub2Page> {
+class FirstSub2PageState extends State<FirstSub2Page> {
   List<Map<String, dynamic>> chapters = [];
   bool isLoading = true;
   String errorMessage = '';

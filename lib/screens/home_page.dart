@@ -267,7 +267,11 @@ class HomePageState extends State<HomePage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Etc2Page()),
+                    MaterialPageRoute(
+                      builder: (context) => Etc2Page(
+                        mostViewedBible: [data['mostViewedBible']],
+                      ),
+                    ),
                   );
                 },
               ),
