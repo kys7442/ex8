@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback onLoginSuccess;
@@ -34,11 +34,15 @@ class LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         final String token = responseData['token'];
-        final String userId = responseData['userId'];
+        final Map<String, dynamic> user = responseData['user'];
 
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('authToken', token);
-        await prefs.setString('userId', userId);
+        await prefs.setInt('userId', user['id']);
+        await prefs.setString('username', user['username']);
+        await prefs.setInt('level', user['level']);
+        await prefs.setString('role', user['role']);
+        await prefs.setString('email', user['email']);
 
         widget.onLoginSuccess();
         Navigator.pop(context);

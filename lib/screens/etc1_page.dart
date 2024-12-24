@@ -21,7 +21,7 @@ class Etc1Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('메뉴1')),
+      appBar: AppBar(title: Text('말씀카드')),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: fetchWordcards(),
         builder: (context, snapshot) {

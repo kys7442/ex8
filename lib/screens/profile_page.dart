@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -18,54 +15,27 @@ class ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    _fetchMemberInfo();
+    _loadMemberInfo();
   }
 
-  Future<void> _fetchMemberInfo() async {
+  Future<void> _loadMemberInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('authToken');
-    String? userId = prefs.getString('userId');
+    int? userId = prefs.getInt('userId');
+    String? username = prefs.getString('username');
+    int? level = prefs.getInt('level');
+    String? role = prefs.getString('role');
+    String? email = prefs.getString('email');
 
-    if (token == null || userId == null) {
-      if (!mounted) return;
-      Navigator.pop(context);
-      return;
-    }
-
-    try {
-      final response = await http.get(
-        Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_members/$userId'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'X-Request-Source': 'app',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        if (!mounted) return;
-        setState(() {
-          memberInfo = json.decode(response.body);
-          isLoading = false;
-        });
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('회원 정보 불러오기 실패')),
-        );
-        setState(() {
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('에러 발생: $e')),
-      );
-      setState(() {
-        isLoading = false;
-      });
-    }
+    setState(() {
+      memberInfo = {
+        'id': userId,
+        'username': username,
+        'level': level,
+        'role': role,
+        'email': email,
+      };
+      isLoading = false;
+    });
   }
 
   @override
@@ -77,19 +47,52 @@ class ProfilePageState extends State<ProfilePage> {
           : memberInfo != null
               ? Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('ID: ${memberInfo!['id']}',
-                          style: TextStyle(fontSize: 18)),
-                      Text('사용자 이름: ${memberInfo!['username']}',
-                          style: TextStyle(fontSize: 18)),
-                      Text('레벨: ${memberInfo!['level']}',
-                          style: TextStyle(fontSize: 18)),
-                      Text('역할: ${memberInfo!['role']}',
-                          style: TextStyle(fontSize: 18)),
-                      // 추가적인 회원 정보 출력
-                    ],
+                  child: Card(
+                    elevation: 4.0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ListTile(
+                            leading: Icon(Icons.person, size: 40),
+                            title: Text(
+                              '사용자 정보',
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Divider(),
+                          ListTile(
+                            title: Text('ID'),
+                            subtitle: Text('${memberInfo!['id']}'),
+                          ),
+                          Divider(),
+                          ListTile(
+                            title: Text('사용자 이름'),
+                            subtitle: Text('${memberInfo!['username']}'),
+                          ),
+                          Divider(),
+                          ListTile(
+                            title: Text('레벨'),
+                            subtitle: Text('${memberInfo!['level']}'),
+                          ),
+                          Divider(),
+                          ListTile(
+                            title: Text('역할'),
+                            subtitle: Text('${memberInfo!['role']}'),
+                          ),
+                          Divider(),
+                          ListTile(
+                            title: Text('이메일'),
+                            subtitle: Text('${memberInfo!['email']}'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 )
               : Center(child: Text('회원 정보를 불러올 수 없습니다.')),
