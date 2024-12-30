@@ -25,7 +25,6 @@ class SignUpPageState extends State<SignUpPage> {
 
     if (username.isEmpty || password.isEmpty || name.isEmpty || email.isEmpty) {
       if (mounted) {
-        print('모든 필드를 입력하지 않았습니다.');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('모든 필드를 입력해주세요.')),
         );
@@ -34,7 +33,6 @@ class SignUpPageState extends State<SignUpPage> {
     }
 
     try {
-      print('회원가입 요청 전송: $username, $email');
       final response = await http.post(
         Uri.parse('${dotenv.env['API_BASE_URL']}/api/appSingUp'),
         headers: {'Content-Type': 'application/json'},
@@ -48,18 +46,15 @@ class SignUpPageState extends State<SignUpPage> {
 
       if (mounted) {
         if (response.statusCode == 201) {
-          print('회원가입 성공');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('회원가입 성공!')),
           );
           await _login(username, password);
         } else if (response.statusCode == 400) {
-          print('아이디 또는 이메일이 이미 존재합니다.');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('아이디 또는 이메일이 이미 존재합니다.')),
           );
         } else {
-          print('회원가입 실패: ${response.body}');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('회원가입 실패: ${response.body}')),
           );
@@ -67,7 +62,6 @@ class SignUpPageState extends State<SignUpPage> {
       }
     } catch (e) {
       if (mounted) {
-        print('에러 발생: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('에러 발생: $e')),
         );
@@ -95,7 +89,6 @@ class SignUpPageState extends State<SignUpPage> {
         await prefs.setString('authToken', token);
         await prefs.setString('userId', userId);
 
-        print('자동 로그인 성공');
         Navigator.pop(context);
       } else {
         final Map<String, dynamic> errorData = json.decode(response.body);

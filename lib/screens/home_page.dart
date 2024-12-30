@@ -141,7 +141,6 @@ class HomePageState extends State<HomePage> {
         hasError = true; // 오류 상태 설정
       });
       _showErrorDialog('네트워크 오류', '네트워크 연결을 확인해주세요.');
-      print(e);
     }
   }
 
