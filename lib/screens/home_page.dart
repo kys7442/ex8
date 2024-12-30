@@ -58,24 +58,32 @@ class HomePageState extends State<HomePage> {
 
         if (response.statusCode == 200) {
           final Map<String, dynamic> responseData = json.decode(response.body);
-          setState(() {
-            isLoggedIn = responseData['isLoggedIn'];
-            authToken = storedToken; // 저장된 토큰을 사용
-          });
+          if (mounted) {
+            setState(() {
+              isLoggedIn = responseData['isLoggedIn'];
+              authToken = storedToken; // 저장된 토큰을 사용
+            });
+          }
         } else {
+          if (mounted) {
+            setState(() {
+              isLoggedIn = false;
+            });
+          }
+        }
+      } catch (e) {
+        if (mounted) {
           setState(() {
             isLoggedIn = false;
           });
         }
-      } catch (e) {
+      }
+    } else {
+      if (mounted) {
         setState(() {
           isLoggedIn = false;
         });
       }
-    } else {
-      setState(() {
-        isLoggedIn = false;
-      });
     }
   }
 
@@ -311,9 +319,7 @@ class HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Etc2Page(
-                              mostViewedBible: [data['mostViewedBible']],
-                            ),
+                            builder: (context) => Etc2Page(),
                           ),
                         );
                       },
