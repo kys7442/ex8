@@ -35,12 +35,34 @@ class CommunityPageState extends State<CommunityPage> {
         setState(() {
           isLoading = false;
         });
+        _showErrorDialog('서버 오류', '커뮤니티 데이터를 가져오는 데 실패했습니다.');
       }
     } catch (e) {
       setState(() {
         isLoading = false;
       });
+      _showErrorDialog('네트워크 오류', '네트워크 연결을 확인해주세요.');
     }
+  }
+
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   String _getMaskedAuthor(String author) {
