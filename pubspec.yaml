@@ -1,6 +1,6 @@
 name: com_pamp_bible_1d1c_app
 package_name: com.pamp.bible_1d1c_app
-description: "bible_1d1c_app."
+description: "매일 1장(chapter) 1절(verse) 읽기를 실처하는 앱을 꿈꿉니다."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
