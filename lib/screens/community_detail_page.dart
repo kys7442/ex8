@@ -26,16 +26,16 @@ class CommunityDetailPage extends StatefulWidget {
 
 class CommunityDetailPageState extends State<CommunityDetailPage> {
   List<Map<String, dynamic>> comments = [];
-  bool isLoggedIn = false; // 로그인 여부를 확인하는 변수
+  bool isLoggedIn = false;
+  String? loggedInUserId;
+  String? loggedInUsername;
   final TextEditingController _commentController = TextEditingController();
-  final TextEditingController _authorController =
-      TextEditingController(); // 작성자 입력 컨트롤러 추가
 
   @override
   void initState() {
     super.initState();
     fetchComments();
-    checkLoginStatus(); // 로그인 상태 확인
+    checkLoginStatus();
   }
 
   Future<void> fetchComments() async {
@@ -46,8 +46,7 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
           comments = List<Map<String, dynamic>>.from(data);
-          comments.sort(
-              (a, b) => a['created_at'].compareTo(b['created_at'])); // 오름차순 정렬
+          comments.sort((a, b) => a['created_at'].compareTo(b['created_at']));
         });
       }
     } catch (e) {
@@ -58,7 +57,11 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
   void checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      isLoggedIn = prefs.getString('authToken') != null; // 토큰이 존재하면 로그인 상태로 간주
+      isLoggedIn = prefs.getString('authToken') != null &&
+          prefs.getInt('userId') != null &&
+          prefs.getString('username') != null;
+      loggedInUserId = prefs.getInt('userId')?.toString();
+      loggedInUsername = prefs.getString('username');
     });
   }
 
@@ -73,11 +76,13 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildPostContent(), // 본문 영역
+            _buildPostContent(),
             SizedBox(height: 16),
-            _buildCommentsSection(), // 댓글 영역
+            _buildLoginStatus(),
             SizedBox(height: 16),
-            _buildCommentInput(), // 댓글 입력 영역
+            _buildCommentsSection(),
+            SizedBox(height: 16),
+            _buildCommentInput(),
           ],
         ),
       ),
@@ -106,15 +111,56 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
     );
   }
 
+  Widget _buildLoginStatus() {
+    return Text(
+      isLoggedIn
+          ? '로그인 상태: ${loggedInUsername ?? '알 수 없음'}'
+          : '로그인되지 않음. 로그인 후 댓글을 작성할 수 있습니다.',
+      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    );
+  }
+
   Widget _buildCommentsSection() {
     return Expanded(
       child: ListView.builder(
         itemCount: comments.length,
         itemBuilder: (context, index) {
           final comment = comments[index];
-          return ListTile(
-            title: Text(comment['content']),
-            subtitle: Text('${comment['author']} - ${comment['created_at']}'),
+          final DateTime createdAt = DateTime.parse(comment['created_at']);
+          final String formattedDate =
+              '${createdAt.year}-${createdAt.month}-${createdAt.day}';
+          final String authorName = comment['author'];
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        comment['content'],
+                        style: TextStyle(fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      authorName,
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4),
+                Text(
+                  formattedDate,
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -122,18 +168,12 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
   }
 
   Widget _buildCommentInput() {
+    if (!isLoggedIn) {
+      return Text('로그인 후 댓글을 작성할 수 있습니다.');
+    }
+
     return Row(
       children: [
-        Expanded(
-          child: TextField(
-            controller: _authorController,
-            decoration: InputDecoration(
-              labelText: '작성자 입력',
-              border: OutlineInputBorder(),
-            ),
-          ),
-        ),
-        SizedBox(width: 8),
         Expanded(
           child: TextField(
             controller: _commentController,
@@ -146,9 +186,10 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
         SizedBox(width: 8),
         ElevatedButton(
           onPressed: () {
-            postComment(_commentController.text, _authorController.text);
-            _commentController.clear();
-            _authorController.clear();
+            if (loggedInUserId != null && loggedInUsername != null) {
+              postComment(_commentController.text, loggedInUsername!);
+              _commentController.clear();
+            }
           },
           child: Text('등록'),
         ),
@@ -163,13 +204,13 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'communityId': widget.communityId.toString(),
-          'author': author, // 입력된 작성자 이름 사용
+          'author': author,
           'content': content,
         }),
       );
 
       if (response.statusCode == 201) {
-        fetchComments(); // 댓글 목록 갱신
+        fetchComments();
       } else {
         // 에러 처리
       }

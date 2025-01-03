@@ -23,7 +23,8 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  bool isLoggedIn = false; // 로그인 여부를 저장하는 변수
+  bool isLoggedIn = false;
+  String? loggedInUsername;
   List<Map<String, dynamic>> wordcards = []; // 말씀 데이터를 저장할 리스트
   bool isLoading = true; // 로딩 상태를 나타내는 변수
   Map<String, dynamic> data = {}; // 데이터를 저장할 변수 추가
@@ -33,66 +34,34 @@ class HomePageState extends State<HomePage> {
   BannerAd? _bannerAd;
   bool _isBannerAdReady = true;
 
+  @override
+  void initState() {
+    super.initState();
+    checkLoginStatus();
+    fetchHomeData(); // 새로운 데이터 가져오는 함수 호출
+    _loadBannerAd(); // 배너 광고 로드
+  }
+
+  void checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isLoggedIn = prefs.getString('authToken') != null &&
+          prefs.getInt('userId') != null &&
+          prefs.getString('username') != null;
+      loggedInUsername = prefs.getString('username');
+    });
+  }
+
   void _logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('authToken');
     await prefs.remove('userId');
+    await prefs.remove('username');
 
     setState(() {
-      isLoggedIn = false; // 로그아웃 처리
+      isLoggedIn = false;
+      loggedInUsername = null;
     });
-  }
-
-  void _checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? storedToken = prefs.getString('authToken');
-
-    if (storedToken != null && storedToken.isNotEmpty) {
-      try {
-        final response = await http.get(
-          Uri.parse('${dotenv.env['API_BASE_URL']}/api/checkLoginStatus'),
-          headers: {
-            'Authorization': 'Bearer $storedToken',
-          },
-        );
-
-        if (response.statusCode == 200) {
-          final Map<String, dynamic> responseData = json.decode(response.body);
-          if (mounted) {
-            setState(() {
-              isLoggedIn = responseData['isLoggedIn'];
-              authToken = storedToken; // 저장된 토큰을 사용
-            });
-          }
-        } else {
-          if (mounted) {
-            setState(() {
-              isLoggedIn = false;
-            });
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            isLoggedIn = false;
-          });
-        }
-      }
-    } else {
-      if (mounted) {
-        setState(() {
-          isLoggedIn = false;
-        });
-      }
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _checkLoginStatus(); // 로그인 상태 확인
-    fetchHomeData(); // 새로운 데이터 가져오는 함수 호출
-    _loadBannerAd(); // 배너 광고 로드
   }
 
   void _loadBannerAd() {
@@ -174,8 +143,7 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('1일1장',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        title: Text('1일1장'),
         centerTitle: true,
         leading: Builder(
           builder: (context) {

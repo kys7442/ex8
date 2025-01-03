@@ -21,6 +21,12 @@ class CommunityPageState extends State<CommunityPage> {
     fetchCommunityData();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    fetchCommunityData(); // 페이지에 들어올 때마다 데이터 갱신
+  }
+
   Future<void> fetchCommunityData() async {
     try {
       final response = await http

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'login_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -9,93 +10,64 @@ class ProfilePage extends StatefulWidget {
 }
 
 class ProfilePageState extends State<ProfilePage> {
-  Map<String, dynamic>? memberInfo;
-  bool isLoading = true;
+  bool isLoggedIn = false;
+  String? username;
+  String? email;
+  String? role;
+  int? userId;
+  int? level;
 
   @override
   void initState() {
     super.initState();
-    _loadMemberInfo();
+    checkLoginStatus();
   }
 
-  Future<void> _loadMemberInfo() async {
+  void checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? userId = prefs.getInt('userId');
-    String? username = prefs.getString('username');
-    int? level = prefs.getInt('level');
-    String? role = prefs.getString('role');
-    String? email = prefs.getString('email');
-
     setState(() {
-      memberInfo = {
-        'id': userId,
-        'username': username,
-        'level': level,
-        'role': role,
-        'email': email,
-      };
-      isLoading = false;
+      isLoggedIn = prefs.getString('authToken') != null;
+      userId = prefs.getInt('userId');
+      username = prefs.getString('username');
+      email = prefs.getString('email');
+      role = prefs.getString('role');
+      level = prefs.getInt('level');
     });
+
+    if (!isLoggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginPage(
+            onLoginSuccess: () {
+              setState(() {
+                checkLoginStatus(); // 로그인 성공 후 상태 갱신
+              });
+            },
+          ),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('프로필')),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : memberInfo != null
-              ? Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Card(
-                    elevation: 4.0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ListTile(
-                            leading: Icon(Icons.person, size: 40),
-                            title: Text(
-                              '사용자 정보',
-                              style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Divider(),
-                          ListTile(
-                            title: Text('ID'),
-                            subtitle: Text('${memberInfo!['id']}'),
-                          ),
-                          Divider(),
-                          ListTile(
-                            title: Text('사용자 이름'),
-                            subtitle: Text('${memberInfo!['username']}'),
-                          ),
-                          Divider(),
-                          ListTile(
-                            title: Text('레벨'),
-                            subtitle: Text('${memberInfo!['level']}'),
-                          ),
-                          Divider(),
-                          ListTile(
-                            title: Text('역할'),
-                            subtitle: Text('${memberInfo!['role']}'),
-                          ),
-                          Divider(),
-                          ListTile(
-                            title: Text('이메일'),
-                            subtitle: Text('${memberInfo!['email']}'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              : Center(child: Text('회원 정보를 불러올 수 없습니다.')),
+      body: Center(
+        child: isLoggedIn
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('사용자 ID: $userId'),
+                  Text('사용자 이름: $username'),
+                  Text('이메일: $email'),
+                  Text('역할: $role'),
+                  Text('레벨: $level'),
+                ],
+              )
+            : CircularProgressIndicator(), // 로그인 상태에 따라 표시
+      ),
     );
   }
 }
