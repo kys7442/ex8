@@ -45,6 +45,29 @@ class CommunityPageState extends State<CommunityPage> {
     }
   }
 
+  Future<void> addCommunity(
+      String title, String content, String author, String category) async {
+    final url = Uri.parse('http://localhost:3000/api/community');
+    final headers = {'Content-Type': 'application/json'};
+    final body = json.encode({
+      'title': title,
+      'content': content,
+      'author': author,
+      'category': category,
+    });
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 201) {
+        fetchCommunityData(); // 새로고침
+      } else {
+        _showErrorDialog('등록 실패', '기도 등록에 실패했습니다.');
+      }
+    } catch (e) {
+      _showErrorDialog('네트워크 오류', '네트워크 연결을 확인해주세요.');
+    }
+  }
+
   void _showErrorDialog(String title, String message) {
     showDialog(
       context: context,
@@ -79,37 +102,103 @@ class CommunityPageState extends State<CommunityPage> {
     return '${parsedDate.year}-${parsedDate.month}-${parsedDate.day}';
   }
 
+  void _showAddCommunityDialog() {
+    final titleController = TextEditingController();
+    final contentController = TextEditingController();
+    final authorController = TextEditingController();
+    final categoryController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('기도 등록'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(labelText: '제목'),
+              ),
+              TextField(
+                controller: contentController,
+                decoration: InputDecoration(labelText: '내용'),
+              ),
+              TextField(
+                controller: authorController,
+                decoration: InputDecoration(labelText: '작성자'),
+              ),
+              TextField(
+                controller: categoryController,
+                decoration: InputDecoration(labelText: '카테고리'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('등록'),
+              onPressed: () {
+                addCommunity(
+                  titleController.text,
+                  contentController.text,
+                  authorController.text,
+                  categoryController.text,
+                );
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('중보기도실')),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: communities.length,
-              itemBuilder: (context, index) {
-                final community = communities[index];
-                return ListTile(
-                  title: Text(
-                    '${community['title']} - ${_getMaskedAuthor(community['author'])} - ${_formatDate(community['created_at'])}',
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CommunityDetailPage(
-                          title: community['title'],
-                          content: community['content'],
-                          author: community['author'],
-                          createdAt: community['created_at'],
-                          communityId: community['id'],
-                          // 필요한 경우 다른 데이터도 전달
+          : Column(
+              children: [
+                ElevatedButton(
+                  onPressed: _showAddCommunityDialog,
+                  child: Text('기도 등록'),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: communities.length,
+                    itemBuilder: (context, index) {
+                      final community = communities[index];
+                      return ListTile(
+                        title: Text(
+                          '${community['title']} - ${_getMaskedAuthor(community['author'])} - ${_formatDate(community['created_at'])}',
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CommunityDetailPage(
+                                title: community['title'],
+                                content: community['content'],
+                                author: community['author'],
+                                createdAt: community['created_at'],
+                                communityId: community['id'],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
     );
   }
