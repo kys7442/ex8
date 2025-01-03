@@ -178,7 +178,7 @@ class CommunityPageState extends State<CommunityPage> {
                       final community = communities[index];
                       return ListTile(
                         title: Text(
-                          '${community['title']} - ${_getMaskedAuthor(community['author'])} - ${_formatDate(community['created_at'])}',
+                          '${community['title']} (${community['comments_count']}) - ${_getMaskedAuthor(community['author'])} - ${_formatDate(community['created_at'])}',
                         ),
                         onTap: () {
                           Navigator.push(
