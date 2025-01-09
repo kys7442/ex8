@@ -6,6 +6,7 @@ import 'community_page.dart';
 import '../widgets/main_bottom_navigation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'shopping.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MainPage extends StatefulWidget {
   final int initialIndex;
@@ -66,25 +67,48 @@ class MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: IndexedStack(
-              index: _selectedIndex,
-              children: _pages.map((page) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: page,
-                );
-              }).toList(),
+          Column(
+            children: [
+              Expanded(
+                child: IndexedStack(
+                  index: _selectedIndex,
+                  children: _pages.map((page) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10.0),
+                      child: page,
+                    );
+                  }).toList(),
+                ),
+              ),
+              if (_isBannerAdReady)
+                SizedBox(
+                  width: _bannerAd!.size.width.toDouble(),
+                  height: _bannerAd!.size.height.toDouble(),
+                  child: AdWidget(ad: _bannerAd!),
+                ),
+            ],
+          ),
+          Positioned(
+            top: 40,
+            right: 10,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                dotenv.env['API_BASE_URL']?.contains('localhost') == true ? 'D' : 'P',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
-          if (_isBannerAdReady)
-            SizedBox(
-              width: _bannerAd!.size.width.toDouble(),
-              height: _bannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _bannerAd!),
-            ),
         ],
       ),
       bottomNavigationBar: MainPageBottomNavigationBar(
