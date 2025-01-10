@@ -91,25 +91,6 @@ class MainPageState extends State<MainPage> {
                 ),
             ],
           ),
-          Positioned(
-            top: 40,
-            right: 10,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                dotenv.env['API_BASE_URL']?.contains('localhost') == true ? 'D' : '',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
       bottomNavigationBar: MainPageBottomNavigationBar(

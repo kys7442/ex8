@@ -134,23 +134,28 @@ class BookGridView extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6.0),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(6.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      books[index][0],
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 4.0),
-                    Text(
-                      books[index],
-                      style: TextStyle(fontSize: 16),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+              child: SizedBox(
+                height: 160,
+                child: Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        books[index][0],
+                        style:
+                            TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 4.0),
+                      Text(
+                        books[index],
+                        style: TextStyle(fontSize: 14),
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
