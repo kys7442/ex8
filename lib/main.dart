@@ -5,8 +5,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  const String env = String.fromEnvironment('ENV', defaultValue: 'development');
-  await dotenv.load(fileName: 'assets/.env.$env');
+  await dotenv.load(fileName: '.env.development');
   MobileAds.instance.initialize();
 
   runApp(MyApp());

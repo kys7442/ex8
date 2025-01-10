@@ -28,7 +28,8 @@ class MainPageState extends State<MainPage> {
     _selectedIndex = widget.initialIndex;
 
     _bannerAd = BannerAd(
-      adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+      // adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+      adUnitId: 'ca-app-pub-3568835154047233~2226160971',
       request: AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
@@ -100,7 +101,7 @@ class MainPageState extends State<MainPage> {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                dotenv.env['API_BASE_URL']?.contains('localhost') == true ? 'D' : 'P',
+                dotenv.env['API_BASE_URL']?.contains('localhost') == true ? 'D' : '',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
