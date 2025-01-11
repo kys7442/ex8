@@ -16,19 +16,83 @@ class SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordConfirmController = TextEditingController();
+  bool _agreeToTerms = false;
+  bool _agreeToPrivacy = false;
+  String _termsContent = '';
+  String _privacyContent = '';
+
+  Future<void> _fetchTerms() async {
+    try {
+      final response = await http.get(Uri.parse('${dotenv.env['API_BASE_URL']}/api/terms'));
+      if (response.statusCode == 200) {
+        final List<dynamic> terms = json.decode(response.body);
+        setState(() {
+          for (var term in terms) {
+            if (term['code'] == 'app_basic') {
+              _termsContent = term['content'];
+              print('표준약관 내용: $_termsContent');
+            } else if (term['code'] == 'app_person') {
+              _privacyContent = term['content'];
+              print('개인정보취급방침 내용: $_privacyContent');
+            }
+          }
+        });
+      } else {
+        throw Exception('Failed to load terms');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('약관을 불러오는 중 오류가 발생했습니다: $e')),
+        );
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTerms();
+  }
 
   Future<void> _signUp() async {
     final String username = _usernameController.text;
     final String password = _passwordController.text;
     final String name = _nameController.text;
     final String email = _emailController.text;
+    final String passwordConfirm = _passwordConfirmController.text;
 
-    if (username.isEmpty || password.isEmpty || name.isEmpty || email.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('모든 필드를 입력해주세요.')),
-        );
-      }
+    if (username.isEmpty) {
+      _showError('아이디를 입력해주세요.');
+      return;
+    }
+    if (password.isEmpty) {
+      _showError('비밀번호를 입력해주세요.');
+      return;
+    }
+    if (!isValidPassword(password)) {
+      _showError('비밀번호는 대문자, 숫자, 특수문자를 각각 하나 이상 포함하고, 최소 6자리 이상이어야 합니다.');
+      return;
+    }
+    if (passwordConfirm.isEmpty) {
+      _showError('비밀번호 확인을 입력해주세요.');
+      return;
+    }
+    if (name.isEmpty) {
+      _showError('이름을 입력해주세요.');
+      return;
+    }
+    if (email.isEmpty) {
+      _showError('이메일을 입력해주세요.');
+      return;
+    }
+    if (password != passwordConfirm) {
+      _showError('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    if (!_agreeToTerms || !_agreeToPrivacy) {
+      _showError('모든 약관에 동의해야 합니다.');
       return;
     }
 
@@ -103,38 +167,137 @@ class SignUpPageState extends State<SignUpPage> {
     }
   }
 
+  bool isValidPassword(String password) {
+    final RegExp passwordRegExp = RegExp(
+      r'^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$',
+    );
+    return passwordRegExp.hasMatch(password);
+  }
+
+  void _showError(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('회원가입')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: '이메일'),
-            ),
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: '아이디'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: '비밀번호'),
-              obscureText: true,
-            ),
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: '이름'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _signUp,
-              child: Text('가입하기'),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('표준약관'),
+              Container(
+                height: 150,
+                padding: EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                ),
+                child: SingleChildScrollView(
+                  child: Text(
+                    _termsContent,
+                    style: TextStyle(height: 1.5),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  Radio(
+                    value: true,
+                    groupValue: _agreeToTerms,
+                    onChanged: (value) {
+                      setState(() {
+                        _agreeToTerms = value!;
+                      });
+                    },
+                  ),
+                  Text('동의함'),
+                  Radio(
+                    value: false,
+                    groupValue: _agreeToTerms,
+                    onChanged: (value) {
+                      setState(() {
+                        _agreeToTerms = value!;
+                      });
+                    },
+                  ),
+                  Text('동의안함'),
+                ],
+              ),
+              Text('개인정보취급방침'),
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: 100,
+                padding: EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                ),
+                child: SingleChildScrollView(
+                  child: Text(
+                    _privacyContent,
+                    style: TextStyle(height: 1.5),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  Radio(
+                    value: true,
+                    groupValue: _agreeToPrivacy,
+                    onChanged: (value) {
+                      setState(() {
+                        _agreeToPrivacy = value!;
+                      });
+                    },
+                  ),
+                  Text('동의함'),
+                  Radio(
+                    value: false,
+                    groupValue: _agreeToPrivacy,
+                    onChanged: (value) {
+                      setState(() {
+                        _agreeToPrivacy = value!;
+                      });
+                    },
+                  ),
+                  Text('동의안함'),
+                ],
+              ),
+              TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(labelText: '아이디'),
+              ),
+              TextField(
+                controller: _passwordController,
+                decoration: InputDecoration(labelText: '비밀번호'),
+                obscureText: true,
+              ),
+              TextField(
+                controller: _passwordConfirmController,
+                decoration: InputDecoration(labelText: '비밀번호 확인'),
+                obscureText: true,
+              ),
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: '이름'),
+              ),
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(labelText: '이메일'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _signUp,
+                child: Text('가입하기'),
+              ),
+            ],
+          ),
         ),
       ),
     );

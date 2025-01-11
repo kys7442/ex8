@@ -6,7 +6,6 @@ import 'community_page.dart';
 import '../widgets/main_bottom_navigation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'shopping.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MainPage extends StatefulWidget {
   final int initialIndex;
@@ -21,6 +20,7 @@ class MainPageState extends State<MainPage> {
   late int _selectedIndex;
   BannerAd? _bannerAd;
   bool _isBannerAdReady = false;
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -28,7 +28,6 @@ class MainPageState extends State<MainPage> {
     _selectedIndex = widget.initialIndex;
 
     _bannerAd = BannerAd(
-      // adUnitId: 'ca-app-pub-3940256099942544/6300978111',
       adUnitId: 'ca-app-pub-3568835154047233~2226160971',
       request: AdRequest(),
       size: AdSize.banner,
@@ -48,6 +47,7 @@ class MainPageState extends State<MainPage> {
   @override
   void dispose() {
     _bannerAd?.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -63,6 +63,7 @@ class MainPageState extends State<MainPage> {
     setState(() {
       _selectedIndex = index;
     });
+    _pageController.jumpToPage(index);
   }
 
   @override
@@ -73,14 +74,14 @@ class MainPageState extends State<MainPage> {
           Column(
             children: [
               Expanded(
-                child: IndexedStack(
-                  index: _selectedIndex,
-                  children: _pages.map((page) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10.0),
-                      child: page,
-                    );
-                  }).toList(),
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
+                  children: _pages,
                 ),
               ),
               if (_isBannerAdReady)

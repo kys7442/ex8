@@ -339,7 +339,7 @@ class HomePageState extends State<HomePage> {
                                   style: TextStyle(fontSize: 16))),
                         ),
                         SizedBox(height: 24),
-                        Text('오늘 추천 말씀카드',
+                        Text('추천 말씀카드',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                         if (isLoading)
@@ -350,15 +350,28 @@ class HomePageState extends State<HomePage> {
                                 vertical: 8.0, horizontal: 16.0),
                             elevation: 4.0,
                             child: ListTile(
-                              dense: true,
-                              title: Text(
-                                '${wordcards[0]['verse']} ${wordcards[0]['book']} ${wordcards[0]['schapter']}:${wordcards[0]['spage']} ~ ${wordcards[0]['echapter']}:${wordcards[0]['epage']}',
-                                style: TextStyle(fontSize: 16),
+                              title: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    wordcards[0]['verse'],
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                  SizedBox(height: 4.0),
+                                  Text(
+                                    '${wordcards[0]['book']} ${wordcards[0]['schapter']}:${wordcards[0]['spage']} ~ ${wordcards[0]['echapter']}:${wordcards[0]['epage']}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                         SizedBox(height: 24),
-                        Text('오늘 추천 찬송가',
+                        Text('추천 찬송가',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                         if (data.isNotEmpty)

@@ -30,6 +30,7 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
   String? loggedInUserId;
   String? loggedInUsername;
   final TextEditingController _commentController = TextEditingController();
+  List<bool> _isExpandedList = [];
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
         setState(() {
           comments = List<Map<String, dynamic>>.from(data);
           comments.sort((a, b) => a['created_at'].compareTo(b['created_at']));
+          _isExpandedList = List<bool>.filled(comments.length, false);
         });
       }
     } catch (e) {
@@ -80,7 +82,7 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
             SizedBox(height: 16),
             _buildLoginStatus(),
             SizedBox(height: 16),
-            _buildCommentsSection(),
+            Expanded(child: _buildCommentsSection()),
             SizedBox(height: 16),
             _buildCommentInput(),
           ],
@@ -90,24 +92,48 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
   }
 
   Widget _buildPostContent() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(widget.title,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        SizedBox(height: 16),
-        Text('Community ID: ${widget.communityId}'),
-        SizedBox(height: 16),
-        Text('Author: ${widget.author}',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
-        Text('Created At: ${widget.createdAt}',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 16),
-        Text('Content:', style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
-        Text(widget.content),
-      ],
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4.0,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.title,
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
+          ),
+          SizedBox(height: 8),
+          Text(
+            '작성자 : ${widget.author}',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey[700]),
+          ),
+          SizedBox(height: 4),
+          Text(
+            '등록일 : ${widget.createdAt}',
+            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+          ),
+          Divider(height: 20, thickness: 1, color: Colors.grey[300]),
+          Text(
+            '내용 :',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+          ),
+          SizedBox(height: 8),
+          Text(
+            widget.content,
+            style: TextStyle(fontSize: 16, color: Colors.black54),
+          ),
+        ],
+      ),
     );
   }
 
@@ -121,49 +147,66 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
   }
 
   Widget _buildCommentsSection() {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: comments.length,
-        itemBuilder: (context, index) {
-          final comment = comments[index];
-          final DateTime createdAt = DateTime.parse(comment['created_at']);
-          final String formattedDate =
-              '${createdAt.year}-${createdAt.month}-${createdAt.day}';
-          final String authorName = comment['author'];
+    return ListView.builder(
+      itemCount: comments.length,
+      itemBuilder: (context, index) {
+        final comment = comments[index];
+        final DateTime createdAt = DateTime.parse(comment['created_at']);
+        final String formattedDate =
+            '${createdAt.year}-${createdAt.month}-${createdAt.day}';
+        final String authorName = comment['author'];
+        final bool isExpanded = _isExpandedList[index];
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          child: Container(
+            padding: EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(8.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4.0,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        comment['content'],
-                        style: TextStyle(fontSize: 16),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      authorName,
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                    ),
-                  ],
+                Text(
+                  authorName,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blue),
                 ),
                 SizedBox(height: 4),
                 Text(
                   formattedDate,
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
+                SizedBox(height: 8),
+                Text(
+                  isExpanded ? comment['content'] : comment['content'].substring(0, 50) + '...',
+                  style: TextStyle(fontSize: 16),
+                  overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                ),
+                if (comment['content'].length > 50)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _isExpandedList[index] = !isExpanded;
+                        });
+                      },
+                      child: Text(isExpanded ? '자세히 닫기' : '자세히 보기'),
+                    ),
+                  ),
               ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 

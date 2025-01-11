@@ -14,28 +14,40 @@ class CommunityPage extends StatefulWidget {
 class CommunityPageState extends State<CommunityPage> {
   List<Map<String, dynamic>> communities = [];
   bool isLoading = true;
+  int currentPage = 1;
+  final int limit = 10;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     fetchCommunityData();
+    _scrollController.addListener(_onScroll);
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    fetchCommunityData(); // 페이지에 들어올 때마다 데이터 갱신
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      fetchCommunityData();
+    }
   }
 
   Future<void> fetchCommunityData() async {
     try {
-      final response = await http
-          .get(Uri.parse('${dotenv.env['API_BASE_URL']}/api/community'));
+      final response = await http.get(Uri.parse(
+          '${dotenv.env['API_BASE_URL']}/api/community?page=$currentPage&limit=$limit'));
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         setState(() {
-          communities = List<Map<String, dynamic>>.from(data['communities']);
+          communities.addAll(List<Map<String, dynamic>>.from(data['communities']));
           isLoading = false;
+          currentPage++;
         });
       } else {
         setState(() {
@@ -53,19 +65,21 @@ class CommunityPageState extends State<CommunityPage> {
 
   Future<void> addCommunity(
       String title, String content, String author, String category) async {
-    final url = Uri.parse('http://localhost:3000/api/community');
+    final url = Uri.parse('${dotenv.env['API_BASE_URL']}/api/community');
     final headers = {'Content-Type': 'application/json'};
     final body = json.encode({
       'title': title,
       'content': content,
       'author': author,
-      'category': category,
     });
 
     try {
       final response = await http.post(url, headers: headers, body: body);
       if (response.statusCode == 201) {
-        fetchCommunityData(); // 새로고침
+        final newCommunity = json.decode(response.body);
+        setState(() {
+          communities.insert(0, newCommunity);
+        });
       } else {
         _showErrorDialog('등록 실패', '기도 등록에 실패했습니다.');
       }
@@ -126,9 +140,13 @@ class CommunityPageState extends State<CommunityPage> {
                 controller: titleController,
                 decoration: InputDecoration(labelText: '제목'),
               ),
-              TextField(
+              TextFormField(
                 controller: contentController,
-                decoration: InputDecoration(labelText: '내용'),
+                decoration: InputDecoration(
+                  labelText: '내용',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: null,
               ),
               TextField(
                 controller: authorController,
@@ -150,13 +168,19 @@ class CommunityPageState extends State<CommunityPage> {
             TextButton(
               child: Text('등록'),
               onPressed: () {
-                addCommunity(
-                  titleController.text,
-                  contentController.text,
-                  authorController.text,
-                  categoryController.text,
-                );
-                Navigator.of(context).pop();
+                if (titleController.text.isEmpty ||
+                    contentController.text.isEmpty ||
+                    authorController.text.isEmpty) {
+                  _showErrorDialog('입력 오류', '모든 필수 항목을 입력해주세요.');
+                } else {
+                  addCommunity(
+                    titleController.text,
+                    contentController.text,
+                    authorController.text,
+                    categoryController.text,
+                  );
+                  Navigator.of(context).pop();
+                }
               },
             ),
           ],
@@ -168,44 +192,61 @@ class CommunityPageState extends State<CommunityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('중보기도실')),
+      appBar: AppBar(
+        title: Text('중보기도실'),
+        centerTitle: true,
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                ElevatedButton(
-                  onPressed: _showAddCommunityDialog,
-                  child: Text('기도 등록'),
-                ),
                 Expanded(
                   child: ListView.builder(
+                    controller: _scrollController,
                     itemCount: communities.length,
                     itemBuilder: (context, index) {
                       final community = communities[index];
-                      return ListTile(
-                        title: Text(
-                          '${community['title']} (${community['comments_count']}) - ${_getMaskedAuthor(community['author'])} - ${_formatDate(community['created_at'])}',
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CommunityDetailPage(
-                                title: community['title'],
-                                content: community['content'],
-                                author: community['author'],
-                                createdAt: community['created_at'],
-                                communityId: community['id'],
-                              ),
+                      return Column(
+                        children: [
+                          ListTile(
+                            tileColor: index % 2 == 0
+                                ? Colors.grey[200]
+                                : Colors.white, // 리스트 항목 배경색 교차
+                            title: Text(
+                              '${community['title']} (${community['comments_count']})',
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
-                          );
-                        },
+                            subtitle: Text(
+                              '${_getMaskedAuthor(community['author'])} - ${_formatDate(community['created_at'])}',
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CommunityDetailPage(
+                                    title: community['title'],
+                                    content: community['content'],
+                                    author: community['author'],
+                                    createdAt: community['created_at'],
+                                    communityId: community['id'],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          Divider(), // 리스트 항목 간 구분선
+                        ],
                       );
                     },
                   ),
                 ),
               ],
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddCommunityDialog,
+        child: Icon(Icons.add),
+        tooltip: '기도 등록',
+      ),
     );
   }
 }

@@ -14,35 +14,62 @@ class HymnPage extends StatefulWidget {
 
 class _HymnPageState extends State<HymnPage> {
   List<Map<String, dynamic>> hymns = [];
-  bool isLoading = true;
-  String errorMessage = '';
+  bool isLoading = false;
+  bool hasMoreData = true;
+  int currentPage = 1;
+  final int limit = 20;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     fetchHymns();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        !isLoading &&
+        hasMoreData) {
+      fetchHymns();
+    }
   }
 
   Future<void> fetchHymns() async {
+    if (isLoading) return;
+    setState(() {
+      isLoading = true;
+    });
+
     try {
-      final response = await http
-          .get(Uri.parse('${dotenv.env['API_BASE_URL']}/api/api_hymn?list'));
+      final response = await http.get(Uri.parse(
+          '${dotenv.env['API_BASE_URL']}/api/api_hymn?list&page=$currentPage&limit=$limit'));
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
+        final List<Map<String, dynamic>> newHymns =
+            List<Map<String, dynamic>>.from(data['hymns']);
+
         setState(() {
-          hymns = List<Map<String, dynamic>>.from(data['hymns']);
+          hymns.addAll(newHymns);
+          currentPage++;
           isLoading = false;
+          hasMoreData = newHymns.length == limit; // 데이터가 limit보다 적으면 더 이상 데이터가 없음
         });
       } else {
         setState(() {
-          errorMessage = '데이터를 가져오는 데 실패했습니다.';
           isLoading = false;
         });
         _showErrorDialog('서버 오류', '찬송가 목록을 가져오는 데 실패했습니다.');
       }
     } catch (e) {
       setState(() {
-        errorMessage = '에러가 발생했습니다: $e';
         isLoading = false;
       });
       _showErrorDialog('네트워크 오류', '네트워크 연결을 확인해주세요.');
@@ -83,43 +110,64 @@ class _HymnPageState extends State<HymnPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('찬송가'),
-        centerTitle: true, // 제목을 중앙에 배치
+        centerTitle: true,
       ),
-      body: isLoading
+      body: isLoading && hymns.isEmpty
           ? Center(child: CircularProgressIndicator())
-          : errorMessage.isNotEmpty
-              ? Center(child: Text(errorMessage))
-              : ListView.builder(
-                  padding: EdgeInsets.all(8.0),
-                  itemCount: hymns.length,
-                  itemBuilder: (context, index) {
-                    final hymn = hymns[index];
-                    return ListTile(
-                      title: Text('${hymn['title']} - ${hymn['category']}'),
-                      subtitle: Text(
-                        hymn['preview'],
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      trailing: IconButton(
-                        icon: Icon(Icons.link),
-                        onPressed: () {
-                          _launchURL(hymn['link']);
-                        },
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => HymnDetailPage(
-                              hymnId: hymn['id'], // 찬송가 ID 전달
-                            ),
+          : Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: hymns.length,
+                    itemBuilder: (context, index) {
+                      final hymn = hymns[index];
+                      return Card(
+                        margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.all(16.0),
+                          title: Text(
+                            '${hymn['title']} - ${hymn['category']}',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                        );
-                      },
-                    );
-                  },
+                          subtitle: Text(
+                            hymn['preview'],
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                          trailing: IconButton(
+                            icon: Icon(Icons.play_circle_fill, color: Colors.red),
+                            onPressed: () {
+                              _launchURL(hymn['link']);
+                            },
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => HymnDetailPage(
+                                  hymnId: hymn['id'],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 ),
+                if (isLoading)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ),
+              ],
+            ),
     );
   }
 }
