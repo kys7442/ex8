@@ -152,6 +152,7 @@ class _HymnPageState extends State<HymnPage> {
                               MaterialPageRoute(
                                 builder: (context) => HymnDetailPage(
                                   hymnId: hymn['id'],
+                                  youtubeUrl: hymn['link'],
                                 ),
                               ),
                             );

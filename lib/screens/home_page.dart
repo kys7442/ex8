@@ -391,6 +391,7 @@ class HomePageState extends State<HomePage> {
                                   MaterialPageRoute(
                                     builder: (context) => HymnDetailPage(
                                       hymnId: data['recommendedHymn']['id'],
+                                      youtubeUrl: data['link'],
                                     ),
                                   ),
                                 );
