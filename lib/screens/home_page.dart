@@ -76,6 +76,7 @@ class HomePageState extends State<HomePage> {
           });
         },
         onAdFailedToLoad: (ad, error) {
+          print('Ad failed to load: $error');
           ad.dispose();
           setState(() {
             _isBannerAdReady = false;
@@ -345,31 +346,32 @@ class HomePageState extends State<HomePage> {
                         if (isLoading)
                           Center(child: CircularProgressIndicator())
                         else
-                          Card(
-                            margin: EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 16.0),
-                            elevation: 4.0,
-                            child: ListTile(
-                              title: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    wordcards[0]['verse'],
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                  SizedBox(height: 4.0),
-                                  Text(
-                                    '${wordcards[0]['book']} ${wordcards[0]['schapter']}:${wordcards[0]['spage']} ~ ${wordcards[0]['echapter']}:${wordcards[0]['epage']}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blue,
+                          if (wordcards.isNotEmpty)
+                            Card(
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 16.0),
+                              elevation: 4.0,
+                              child: ListTile(
+                                title: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      wordcards[0]['verse'],
+                                      style: TextStyle(fontSize: 16),
                                     ),
-                                  ),
-                                ],
+                                    SizedBox(height: 4.0),
+                                    Text(
+                                      '${wordcards[0]['book']} ${wordcards[0]['schapter']}:${wordcards[0]['spage']} ~ ${wordcards[0]['echapter']}:${wordcards[0]['epage']}',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
                         SizedBox(height: 24),
                         Text('추천 찬송가',
                             style: TextStyle(

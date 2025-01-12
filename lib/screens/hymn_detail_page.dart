@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class HymnDetailPage extends StatefulWidget {
   final int hymnId;
@@ -15,23 +14,13 @@ class HymnDetailPage extends StatefulWidget {
 }
 
 class HymnDetailPageState extends State<HymnDetailPage> {
-  late YoutubePlayerController _controller;
-
   @override
   void initState() {
     super.initState();
-    _controller = YoutubePlayerController(
-      initialVideoId: YoutubePlayer.convertUrlToId(widget.youtubeUrl) ?? '',
-      flags: YoutubePlayerFlags(
-        autoPlay: false,
-        mute: false,
-      ),
-    );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
   }
 
@@ -68,10 +57,6 @@ class HymnDetailPageState extends State<HymnDetailPage> {
                             Text(hymn['preview']),
                           ],
                         ),
-                      ),
-                      YoutubePlayer(
-                        controller: _controller,
-                        showVideoProgressIndicator: true,
                       ),
                     ],
                   );

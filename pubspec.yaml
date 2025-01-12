@@ -34,9 +34,8 @@ dependencies:
   provider: ^6.0.5
   flutter_svg: ^2.0.14
   http: 1.2.2 # API 호출을 위해 필요한 패키지
-  google_mobile_ads: ^5.2.0
+  google_mobile_ads: ^5.0.0
   flutter_dotenv: ^5.0.2
-  youtube_player_flutter: ^8.0.0
   url_launcher: ^6.0.20
   shared_preferences: ^2.0.15
 
