@@ -66,7 +66,7 @@ class HomePageState extends State<HomePage> {
 
   void _loadBannerAd() {
     _bannerAd = BannerAd(
-      adUnitId: 'YOUR_AD_UNIT_ID', // 실제 광고 단위 ID로 변경
+      adUnitId: 'ca-app-pub-3568835154047233~2226160971', // 실제 광고 단위 ID로 변경
       request: AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
@@ -346,7 +346,7 @@ class HomePageState extends State<HomePage> {
                         if (isLoading)
                           Center(child: CircularProgressIndicator())
                         else
-                          if (wordcards.isNotEmpty)
+                          if (wordcards.isNotEmpty && wordcards[0].containsKey('verse'))
                             Card(
                               margin: EdgeInsets.symmetric(
                                   vertical: 8.0, horizontal: 16.0),

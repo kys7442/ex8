@@ -47,7 +47,6 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
           comments = List<Map<String, dynamic>>.from(data);
-          comments.sort((a, b) => a['created_at'].compareTo(b['created_at']));
           _isExpandedList = List<bool>.filled(comments.length, false);
         });
       }
@@ -95,7 +94,7 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
     return Container(
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.background,
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: [
           BoxShadow(
@@ -110,27 +109,45 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
         children: [
           Text(
             widget.title,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
+            ),
           ),
           SizedBox(height: 8),
           Text(
             '작성자 : ${widget.author}',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey[700]),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[300] : Colors.grey[700],
+            ),
           ),
           SizedBox(height: 4),
           Text(
             '등록일 : ${widget.createdAt}',
-            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[300] : Colors.grey[700],
+            ),
           ),
           Divider(height: 20, thickness: 1, color: Colors.grey[300]),
           Text(
             '내용 :',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
+            ),
           ),
           SizedBox(height: 8),
           Text(
             widget.content,
-            style: TextStyle(fontSize: 16, color: Colors.black54),
+            style: TextStyle(
+              fontSize: 16,
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[300] : Colors.black54,
+            ),
           ),
         ],
       ),
@@ -138,11 +155,33 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
   }
 
   Widget _buildLoginStatus() {
-    return Text(
-      isLoggedIn
-          ? '로그인 상태: ${loggedInUsername ?? '알 수 없음'}'
-          : '로그인되지 않음. 로그인 후 댓글을 작성할 수 있습니다.',
-      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary,
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '댓글',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          Icon(
+            Icons.comment,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ],
+      ),
     );
   }
 
@@ -162,7 +201,7 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
           child: Container(
             padding: EdgeInsets.all(12.0),
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(8.0),
               boxShadow: [
                 BoxShadow(
@@ -176,19 +215,36 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  authorName,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blue),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  formattedDate,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  isExpanded 
+                    ? comment['content'] 
+                    : comment['content'].length > 50 
+                      ? comment['content'].substring(0, 50) + '...' 
+                      : comment['content'],
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[300] : Colors.black54,
+                  ),
+                  overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
                 ),
                 SizedBox(height: 8),
-                Text(
-                  isExpanded ? comment['content'] : comment['content'].substring(0, 50) + '...',
-                  style: TextStyle(fontSize: 16),
-                  overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      formattedDate,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[300] : Colors.grey,
+                      ),
+                    ),
+                    Text(
+                      authorName,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[300] : Colors.black,
+                      ),
+                    ),
+                  ],
                 ),
                 if (comment['content'].length > 50)
                   Align(
@@ -199,9 +255,14 @@ class CommunityDetailPageState extends State<CommunityDetailPage> {
                           _isExpandedList[index] = !isExpanded;
                         });
                       },
-                      child: Text(isExpanded ? '자세히 닫기' : '자세히 보기'),
+                      child: Text(isExpanded ? '자세히 닫기' : '자세히 보기',
+                          style: TextStyle(
+                            color: Theme.of(context).brightness == Brightness.dark ? Colors.blueAccent : Colors.blue,
+                          )),
                     ),
                   ),
+                if (index < comments.length - 1)
+                  Divider(height: 20, thickness: 1, color: Colors.grey[300]),
               ],
             ),
           ),

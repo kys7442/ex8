@@ -24,16 +24,24 @@ class LoginPageState extends State<LoginPage> {
     try {
       final response = await http.post(
         Uri.parse('${dotenv.env['API_BASE_URL']}/api/login'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'x-request-source': 'app',
+        },
         body: json.encode({
           'username': username,
           'password': password,
         }),
       );
 
+      print('username: $username');
+      print('password: $password');
+      print('response: ${response.body}');
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         final String token = responseData['token'];
+        final String redirectUrl = responseData['redirectUrl'];
         final Map<String, dynamic> user = responseData['user'];
 
         SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -44,8 +52,12 @@ class LoginPageState extends State<LoginPage> {
         await prefs.setString('role', user['role']);
         await prefs.setString('email', user['email']);
 
-        widget.onLoginSuccess();
-        Navigator.pop(context);
+        if (redirectUrl.isNotEmpty) {
+          Navigator.pushReplacementNamed(context, redirectUrl);
+        } else {
+          widget.onLoginSuccess();
+          Navigator.pop(context);
+        }
       } else {
         final Map<String, dynamic> errorData = json.decode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(

@@ -210,14 +210,20 @@ class CommunityPageState extends State<CommunityPage> {
                         children: [
                           ListTile(
                             tileColor: index % 2 == 0
-                                ? Colors.grey[200]
-                                : Colors.white, // 리스트 항목 배경색 교차
+                                ? (Theme.of(context).brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[200])
+                                : (Theme.of(context).brightness == Brightness.dark ? Colors.grey[700] : Colors.white),
                             title: Text(
                               '${community['title']} (${community['comments_count']})',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+                              ),
                             ),
                             subtitle: Text(
                               '${_getMaskedAuthor(community['author'])} - ${_formatDate(community['created_at'])}',
+                              style: TextStyle(
+                                color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[300] : Colors.black54,
+                              ),
                             ),
                             onTap: () {
                               Navigator.push(
@@ -234,7 +240,7 @@ class CommunityPageState extends State<CommunityPage> {
                               );
                             },
                           ),
-                          Divider(), // 리스트 항목 간 구분선
+                          Divider(),
                         ],
                       );
                     },
