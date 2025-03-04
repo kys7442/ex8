@@ -1,4 +1,4 @@
-# ex8
+# com.pamp.bible_1d1c_app
 
 ```
 Flutter 3.24.4 • channel stable • https://github.com/flutter/flutter.git
